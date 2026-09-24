@@ -7,12 +7,16 @@ Design sources for [CandleStack](https://github.com/CandleStack-FEI-STU): UI moc
 | Mockup | Source | Ticket |
 | --- | --- | --- |
 | Ops status page (`ops.candlestack.tech`) | [`mockups/ops/index.html`](mockups/ops/index.html) | [candlestack#8](https://github.com/CandleStack-FEI-STU/candlestack/issues/8) |
+| Website, desktop: Home, Meetings, Meeting, Status, Team in light and dark (the approved concept) | [`mockups/website/desktop/`](mockups/website/desktop/) | |
+| Website, mobile "Terminal" variant (rejected: mobile must look like desktop) | [`mockups/website/mobile-terminal-rejected/`](mockups/website/mobile-terminal-rejected/) | |
+
+To view a mockup, download the HTML file and open it in a browser.
 
 ## Layout
 
 | Path | Contents |
 | --- | --- |
-| `mockups/<name>/index.html` | One mockup per folder, a single self-contained HTML file |
+| `mockups/<name>/` | One folder per mockup, self-contained HTML files |
 | `brand/` | Logo sources and exports (see [.github#2](https://github.com/CandleStack-FEI-STU/.github/issues/2)) |
 
 ## Conventions
