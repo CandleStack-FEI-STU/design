@@ -23,6 +23,6 @@ To view a mockup, download the HTML file and open it in a browser.
 
 - Mockups follow the website style: Geist and Geist Mono, color tokens from
   [`website/src/styles/global.css`](https://github.com/CandleStack-FEI-STU/website/blob/main/src/styles/global.css).
-- Every mockup works on desktop and on a phone (from 360 px), in light and dark theme.
+- New mockups cover desktop and phone widths (from 360 px) and both light and dark theme.
 - Mockups use example data only. No real hostnames of internal services, credentials or personal data.
 - Changes go through a pull request, like in the other repositories.
