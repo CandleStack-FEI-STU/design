@@ -6,8 +6,8 @@ Design sources for [CandleStack](https://github.com/CandleStack-FEI-STU): UI moc
 
 | Mockup | Source | Ticket |
 | --- | --- | --- |
-| Ops status page (`ops.candlestack.tech`) | [`mockups/ops/index.html`](mockups/ops/index.html) | [candlestack#8](https://github.com/CandleStack-FEI-STU/candlestack/issues/8) |
-| Website home: Links section (groups side by side; on phones two links per line), light and dark | [`mockups/website/links/`](mockups/website/links/) | [website#15](https://github.com/CandleStack-FEI-STU/website/pull/15) |
+| Ops status page (`ops.candlestack.tech`): the real page with example data built in; hover (or tap) a day for its outages, theme toggle, any width | [`mockups/ops/index.html`](mockups/ops/index.html) | [candlestack#8](https://github.com/CandleStack-FEI-STU/candlestack/issues/8), [ops#3](https://github.com/CandleStack-FEI-STU/ops/pull/3) |
+| Website home: Links section (groups side by side; on phones two links per line), light and dark | [`mockups/website/links/`](mockups/website/links/) | [website#15](https://github.com/CandleStack-FEI-STU/website/pull/15), [website#16](https://github.com/CandleStack-FEI-STU/website/pull/16) |
 | Website, desktop: Home, Meetings, Meeting, Status, Team in light and dark (the approved concept) | [`mockups/website/desktop/`](mockups/website/desktop/) | |
 | Website, mobile "Terminal" variant (rejected: mobile must look like desktop) | [`mockups/website/mobile-terminal-rejected/`](mockups/website/mobile-terminal-rejected/) | |
 
