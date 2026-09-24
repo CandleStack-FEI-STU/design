@@ -2,13 +2,11 @@
 
 Design sources for [CandleStack](https://github.com/CandleStack-FEI-STU): UI mockups and brand assets.
 
-Browse the rendered mockups at **https://candlestack-fei-stu.github.io/design/**.
-
 ## Mockups
 
-| Mockup | Preview | Source | Ticket |
-| --- | --- | --- | --- |
-| Ops status page (`ops.candlestack.tech`) | [open](https://candlestack-fei-stu.github.io/design/mockups/ops/) | [`mockups/ops/index.html`](mockups/ops/index.html) | [candlestack#8](https://github.com/CandleStack-FEI-STU/candlestack/issues/8) |
+| Mockup | Source | Ticket |
+| --- | --- | --- |
+| Ops status page (`ops.candlestack.tech`) | [`mockups/ops/index.html`](mockups/ops/index.html) | [candlestack#8](https://github.com/CandleStack-FEI-STU/candlestack/issues/8) |
 
 ## Layout
 
