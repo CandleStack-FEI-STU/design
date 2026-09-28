@@ -26,4 +26,6 @@ To view a mockup, download the HTML file and open it in a browser.
   [`website/src/styles/global.css`](https://github.com/CandleStack-FEI-STU/website/blob/main/src/styles/global.css).
 - New mockups cover desktop and phone widths (from 360 px) and both light and dark theme.
 - Mockups use example data or public facts only: no credentials or personal data.
-- Changes go through a pull request, like in the other repositories.
+- Changes go through a pull request, like in the other repositories. The pre-commit hooks
+  (`.pre-commit-config.yaml`: whitespace, secrets, typos, Markdown, workflows, comments) run in
+  CI; install them once per clone with `uvx pre-commit install`.

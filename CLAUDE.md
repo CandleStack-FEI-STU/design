@@ -16,4 +16,6 @@ and brand assets in `brand/`. Read the conventions in [README.md](README.md) fir
 ## Verify
 
 There is no build: open the changed HTML files in a browser at desktop and phone widths, in
-both themes. CI runs only the `no-ai-signs` and `linked-issue` checks.
+both themes. Run the hooks with `uvx pre-commit run --all-files` (install them once with
+`uvx pre-commit install`). CI runs them and the `no-ai-signs`, `linked-issue` and `pr-hygiene`
+checks.
