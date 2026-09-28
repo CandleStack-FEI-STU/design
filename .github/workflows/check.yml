@@ -12,3 +12,7 @@ jobs:
   # No AI attribution in commits or the pull request. Nothing else to build here.
   no-ai-signs:
     uses: CandleStack-FEI-STU/.github/.github/workflows/no-ai-signs.yml@main
+
+  # The description closes an issue ("Closes #N").
+  linked-issue:
+    uses: CandleStack-FEI-STU/.github/.github/workflows/linked-issue.yml@main

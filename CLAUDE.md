@@ -16,4 +16,4 @@ and brand assets in `brand/`. Read the conventions in [README.md](README.md) fir
 ## Verify
 
 There is no build: open the changed HTML files in a browser at desktop and phone widths, in
-both themes. CI runs only the `no-ai-signs` check.
+both themes. CI runs only the `no-ai-signs` and `linked-issue` checks.
