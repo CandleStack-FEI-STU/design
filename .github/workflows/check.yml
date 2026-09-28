@@ -16,3 +16,9 @@ jobs:
   # The description closes an issue ("Closes #N").
   linked-issue:
     uses: CandleStack-FEI-STU/.github/.github/workflows/linked-issue.yml@main
+
+  # The title and branch follow the conventions; a warning when the pull request is large.
+  pr-hygiene:
+    uses: CandleStack-FEI-STU/.github/.github/workflows/pr-hygiene.yml@main
+    permissions:
+      pull-requests: read
