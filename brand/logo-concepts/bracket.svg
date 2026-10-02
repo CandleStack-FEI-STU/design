@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="CandleStack">
+  <style>
+    .a { fill: #0f766e; }
+    .b { fill: #fafaf9; }
+    @media (prefers-color-scheme: dark) {
+      .a { fill: #3cc7a6; }
+      .b { fill: #0d0f11; }
+    }
+  </style>
+  <g class="a">
+    <path d="M28 2H4v28h24v-4H8V6h20z"/>
+    <rect x="16" y="8" width="2" height="16"/>
+    <rect x="14" y="10" width="6" height="12"/>
+  </g>
+</svg>
