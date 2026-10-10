@@ -18,7 +18,7 @@ To view a mockup, download the HTML file and open it in a browser.
 | Path | Contents |
 | --- | --- |
 | `mockups/<name>/` | One folder per mockup, self-contained HTML files |
-| `brand/` | Logo sources and exports (see [.github#2](https://github.com/CandleStack-FEI-STU/.github/issues/2)) |
+| `brand/` | Dark logo and dark icon (see [.github#2](https://github.com/CandleStack-FEI-STU/.github/issues/2)) |
 
 ## Conventions
 
