@@ -21,14 +21,14 @@
     :root:not([data-theme="light"]) {
       --bg: #0d0f11; --ink: #ecedee; --muted: #9ba1a6; --rule: #23272b; --accent: #3cc7a6; --down: #f0616d;
       --grid: rgb(230 232 234 / 0.045); --candle-up: #43b049; --candle-down: #f23645;
-      --ico-ring: rgb(255 255 255 / 0.12);
+      --ico-ring: #33383d;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0d0f11; --ink: #ecedee; --muted: #9ba1a6; --rule: #23272b; --accent: #3cc7a6; --down: #f0616d;
     --grid: rgb(230 232 234 / 0.045); --candle-up: #43b049; --candle-down: #f23645;
-    --ico-ring: rgb(255 255 255 / 0.12);
+    --ico-ring: #33383d;
     color-scheme: dark;
   }
   :root {
@@ -77,9 +77,11 @@
   .ftr-in a:hover { color: var(--ink); }
 
   /* The instrument icon: the approved "Final" values (candlestack#179) */
+  /* The tile clips the logo to its radius. The logo sits 1 px inside the edge, so a logo that runs
+     to the border of its own image (Apple) never covers the hairline, which is drawn above it. */
   .ico { position: relative; flex: none; overflow: hidden; background: #ffffff; }
-  .ico img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .ico::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ico-ring); pointer-events: none; }
+  .ico img { position: absolute; inset: 1px; display: block; width: calc(100% - 2px); height: calc(100% - 2px); object-fit: contain; border-radius: inherit; }
+  .ico::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ico-ring); pointer-events: none; }
   .ico-list, .ico-search { width: 32px; height: 32px; border-radius: 3.2px; }
   .ico-head { width: 64px; height: 64px; border-radius: 6.4px; }
 
@@ -242,7 +244,7 @@
           </tbody>
         </table>
       </div>
-      <p>Every logo sits on a white plate with a 1 px inner hairline (<code>rgb(20 20 20 / 0.09)</code> light, <code>rgb(255 255 255 / 0.12)</code> dark), so black logos such as Apple stay visible on dark. In Tailwind: <code>size-8 rounded-[10%]</code> and <code>size-16 rounded-[10%]</code>, <code>bg-white</code>, <code>loading="lazy"</code>, empty <code>alt</code>. The fallback is the backend's tile made square (<code>rx</code> 14 to 0), clipped by the same radius.</p>
+      <p>Every logo sits on a white plate, so black logos such as Apple stay visible on dark. The tile clips the logo to its radius (<code>overflow-hidden</code>); the logo fills the tile 1 px inside the edge (<code>object-contain</code>), and a 1 px hairline (<code>rgb(20 20 20 / 0.09)</code> light, <code>#33383d</code> dark) is drawn above it, so no logo runs over the edge, even one that touches the border of its own image (Apple). In Tailwind: tile <code>relative size-8 overflow-hidden rounded-[10%] bg-white</code> (<code>size-16</code> on the instrument page) with an <code>after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-inset</code> overlay, image <code>absolute inset-px size-[calc(100%-2px)] object-contain</code>, <code>loading="lazy"</code>, empty <code>alt</code>. The fallback is the backend's tile made square (<code>rx</code> 14 to 0), clipped by the same radius.</p>
       <p>Proposed classes in <code>frontend/src/features/instruments/QuickSearch.tsx</code>:</p>
       <div class="scroll">
         <table>
