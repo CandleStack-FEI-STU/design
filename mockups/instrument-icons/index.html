@@ -122,7 +122,7 @@
   .pl { border: 1px solid var(--rule); border-radius: 6px; padding: 6px 12px; font-size: 14px; line-height: 20px; }
   a.pl:hover { background: var(--surface); }
   .pl.off { opacity: 0.4; }
-  .pn { font-size: 14px; color: var(--muted); }
+  .page-num { font-size: 14px; color: var(--muted); }
 
   /* Header quick search (QuickSearch.tsx) with the proposed phone fix: below 640 px the wrapper is
      not positioned, so the list is placed against the sticky header with 16 px on both sides. */
@@ -254,7 +254,7 @@
           </tbody>
         </table>
       </div>
-      <p>Example data: the logos are the PNGs the backend serves from logo.dev today (the BRK.B one is a wrong match, not a design choice); prices and the candle chart are placeholders.</p>
+      <p>Example data: the logos are the PNG images the backend serves from logo.dev today (the BRK.B one is a wrong match, not a design choice); prices and the candle chart are placeholders.</p>
     </div>
   </details>
 </div>
@@ -379,7 +379,7 @@
         <div class="filters" id="filters">${filtersHtml()}</div>
       </div>
       <div class="tblbox" id="rows">${rowsHtml()}</div>
-      <nav class="pager" aria-label="Pages"><span class="pl off" aria-disabled="true">Previous</span><span class="pn">Page 1</span><a class="pl" href="#/">Next</a></nav>`;
+      <nav class="pager" aria-label="Pages"><span class="pl off" aria-disabled="true">Previous</span><span class="page-num">Page 1</span><a class="pl" href="#/">Next</a></nav>`;
     const refresh = () => {
       document.getElementById('rows').innerHTML = rowsHtml();
       document.getElementById('filters').innerHTML = filtersHtml();
