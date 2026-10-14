@@ -520,6 +520,11 @@
   .ilist .bt svg { width: 12px; height: 12px; fill: currentColor; }
   .ilist .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .ilist table.mini { min-width: 0; }
+  .ilist table.mini .m-ex { width: 96px; }
+  .ilist table.mini .m-ch { width: 136px; }
+  .ilist table.mini .m-px { width: 112px; }
+  .ilist table.mini .m-chg { width: 92px; }
+  @media (max-width: 639px) { .ilist table.mini .m-ch { width: 60px; } .ilist table.mini .m-px { width: 104px; } }
   .ilist table.mini .sym { font-weight: 500; }
   .ilist tr[data-href] { cursor: pointer; }
   .ilist a.sym { color: inherit; text-decoration: none; }
@@ -1174,10 +1179,10 @@ route();
     return `<tr data-href="#/instrument/${encodeURIComponent(d.symbol)}"><td><div class="symcell"><span class="ico"><img src="${d.icon}" alt="" width="64" height="64" loading="lazy"></span><a class="sym" href="#/instrument/${encodeURIComponent(d.symbol)}">${esc(d.symbol)}</a></div></td>
       <td class="sm-cell"><span class="mx">${EX_NAME[d.exchange]}</span></td>
       <td><span class="spark big">${candles(d, 10, 112, 32, false)}</span><span class="spark small">${candles(d, 7, 44, 24, false)}</span></td>
-      <td class="num"><span class="px">${price(d.price)}</span></td>
-      <td class="num"><span class="chg arrow ${t}">${arrow}${Math.abs(d.change).toFixed(2)}%</span></td></tr>`;
+      <td class="num"><div class="pstk"><span class="px">${price(d.price)}</span><span class="chg ph-only ${t}">${signed(d.change)}</span></div></td>
+      <td class="num sm-cell"><span class="chg arrow ${t}">${arrow}${Math.abs(d.change).toFixed(2)}%</span></td></tr>`;
   };
-  document.getElementById('home-rows').innerHTML = `<table class="mini"><thead><tr><th scope="col">Symbol</th><th scope="col" class="sm-cell" style="width:96px">Exchange</th><th scope="col" style="width:136px"><span class="d-only">10d</span><span class="ph-only">7d</span></th><th scope="col" class="num" style="width:112px">Price</th><th scope="col" class="num" style="width:92px">24h</th></tr></thead><tbody>${top.map(miniRow).join('')}</tbody></table>`;
+  document.getElementById('home-rows').innerHTML = `<table class="mini"><thead><tr><th scope="col">Symbol</th><th scope="col" class="sm-cell m-ex">Exchange</th><th scope="col" class="m-ch"><span class="d-only">10d</span><span class="ph-only">7d</span></th><th scope="col" class="num m-px"><span class="d-only">Price</span><span class="ph-only">Price · 24h</span></th><th scope="col" class="num sm-cell m-chg">24h</th></tr></thead><tbody>${top.map(miniRow).join('')}</tbody></table>`;
   readUrl();
   render();
   route();
