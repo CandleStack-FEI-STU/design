@@ -140,13 +140,13 @@
   .chip { appearance: none; font: 500 12px var(--mono); padding: 3px 9px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); }
   button.chip { cursor: pointer; }
   .chip.later { color: var(--muted); border-style: dashed; }
-  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-  .opt { appearance: none; text-align: left; border: 1px solid var(--rule); border-radius: 8px; padding: 12px; background: var(--bg); cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
-  .opt:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--rule)); }
-  .opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-  .opt b { font-size: 14px; } .opt span { font-size: 12.5px; color: var(--muted); }
-  .opt-fig { height: 30px; margin-bottom: 4px; }
-  .opt-fig svg { height: 30px; width: auto; display: block; }
+
+
+
+
+
+
+
   .params { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
   .pm { border: 1px solid var(--rule); border-radius: 6px; padding: 7px 10px; display: flex; flex-direction: column; gap: 1px; background: var(--bg); }
   .pm .k { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
@@ -208,7 +208,7 @@
   .sk { fill: none; stroke-width: 1.5; } .sk.u { stroke: var(--candle-up); } .sk.d { stroke: var(--candle-down); }
   .cap { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 12px var(--mono); color: var(--muted); }
   .mx-row { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 16px; align-items: center; }
-  .mx { width: 100%; height: auto; display: block; }
+
 
   /* A: wizard */
   .wz-prog { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 22px; }
@@ -256,13 +256,13 @@
   /* D: one sentence */
   .sn { padding: 32px; display: flex; flex-direction: column; gap: 22px; }
   .sn-text { font-size: 27px; line-height: 1.75; font-weight: 500; letter-spacing: -0.015em; text-wrap: pretty; max-width: 40ch; }
-  .tokw { position: relative; display: inline; }
-  .tok { appearance: none; border: 0; border-bottom: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); background: var(--accent-soft); color: var(--accent); font: inherit; padding: 0 6px; border-radius: 6px 6px 2px 2px; cursor: pointer; }
-  .tok:hover { background: color-mix(in srgb, var(--accent) 20%, var(--bg)); }
-  .pop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 10px 28px var(--shadow); padding: 4px; min-width: 230px; display: flex; flex-direction: column; }
-  .pop button { appearance: none; text-align: left; padding: 8px 10px; border: 0; background: none; border-radius: 6px; font: 400 14px/1.4 var(--sans); letter-spacing: 0; color: var(--ink); cursor: pointer; white-space: nowrap; }
-  .pop button:hover, .pop button.on { background: var(--surface); }
-  .pop button.on { font-weight: 600; }
+
+
+
+
+
+
+
   details.more { border-top: 1px solid var(--rule); padding-top: 14px; }
   details.more summary { cursor: pointer; font-weight: 500; }
   details.more .params { margin-top: 12px; }
@@ -312,24 +312,24 @@
   .plh-wire .dot { position: absolute; top: -2px; left: -6px; width: 6px; height: 6px; border-radius: 999px; background: var(--accent); animation: flow 2.4s linear infinite; }
   .plh-wire:nth-child(4) .dot { animation-delay: 0.6s; } .plh-wire:nth-child(6) .dot { animation-delay: 1.2s; } .plh-wire:nth-child(8) .dot { animation-delay: 1.8s; }
   @keyframes flow { to { left: 100%; } }
-  @media (prefers-reduced-motion: reduce) { .plh-wire .dot { animation: none; left: 50%; } }
+  @media (prefers-reduced-motion: reduce) { .plh-wire .dot { animation: none; left: 50%; }  }
   .hc { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   .hc-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; font: 12.5px var(--mono); color: var(--muted); }
   .hero .sn-text { font-size: 34px; line-height: 1.6; max-width: 34ch; margin-top: 10px; }
   .nbh { display: flex; flex-direction: column; gap: 8px; }
   .nbh .cell { grid-template-columns: 36px minmax(0, 1fr); }
-  .sec { padding-block: 36px; border-top: 1px solid var(--rule); }
-  .sec h2 { font-size: 22px; letter-spacing: -0.02em; margin-top: 6px; }
-  .sec .sub { color: var(--muted); margin-top: 6px; max-width: 62ch; }
-  .sec .body { margin-top: 20px; }
+  .hsec { padding-block: 36px; border-top: 1px solid var(--rule); }
+  .hsec h2 { font-size: 22px; letter-spacing: -0.02em; margin-top: 6px; }
+  .hsec .sub { color: var(--muted); margin-top: 6px; max-width: 62ch; }
+  .hsec .body { margin-top: 20px; }
   .layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .layer-c { padding: 18px; display: flex; flex-direction: column; gap: 8px; }
   .layer-c h3 { font-size: 16px; }
   .layer-c p { color: var(--muted); font-size: 13.5px; }
-  .sec.two { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
-  .sec.two .btn { margin-top: 16px; }
-  .sym { display: flex; align-items: center; gap: 10px; }
-  .sym .tile { width: 28px; height: 28px; font-size: 8px; }
+  .hsec.two { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
+  .hsec.two .btn { margin-top: 16px; }
+
+
 
   /* Notes */
   .notes { margin-top: 26px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
@@ -340,7 +340,7 @@
 
   @media (max-width: 980px) {
     .intro, .notes { grid-template-columns: minmax(0, 1fr); }
-    .hero, .sec.two, .lc, .pl-body, .two-ch { grid-template-columns: minmax(0, 1fr); }
+    .hero, .hsec.two, .lc, .pl-body, .two-ch { grid-template-columns: minmax(0, 1fr); }
     .layers { grid-template-columns: minmax(0, 1fr); }
     .lc-main { position: static; }
   }
@@ -361,7 +361,7 @@
 
   /* The home page on its own: the page is the app, so the grid is the body's background */
   html { scroll-behavior: smooth; scroll-padding-top: 72px; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; }  }
   body {
     background-color: var(--bg);
     background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
@@ -557,20 +557,30 @@
   /* Coming soon: a faint sketch of what will be there, the tag on top */
   .soon-card { position: relative; border: 1px solid var(--rule); border-radius: 12px; background: var(--bg); padding: 20px; overflow: hidden; }
   .soon-ghost { display: flex; flex-direction: column; gap: 14px; -webkit-mask-image: linear-gradient(180deg, #000 20%, transparent 105%); mask-image: linear-gradient(180deg, #000 20%, transparent 105%); }
-  .g-row { display: grid; grid-template-columns: 0.7fr 1.3fr 1fr 0.8fr 0.6fr; gap: 18px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
-  .g-row:last-child { border-bottom: 0; padding-bottom: 0; }
-  .g { display: block; height: 9px; border-radius: 5px; background: var(--surface2); }
-  .g-head .g { height: 7px; background: var(--surface); }
-  .g.up { background: color-mix(in srgb, var(--up) 26%, var(--bg)); }
-  .g.dn { background: color-mix(in srgb, var(--down) 24%, var(--bg)); }
-  .g-s { height: 7px; background: var(--surface); }
-  .g-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; flex-direction: initial; }
-  .g-card { border: 1px solid var(--rule); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .g-card svg { width: 100%; height: 34px; display: block; margin: 4px 0; }
-  .g-card path { fill: none; stroke: color-mix(in srgb, var(--accent) 40%, var(--bg)); stroke-width: 2; vector-effect: non-scaling-stroke; }
-  .g-meta { display: flex; justify-content: space-between; gap: 8px; }
+  .gh-row { display: grid; grid-template-columns: 0.7fr 1.3fr 1fr 0.8fr 0.6fr; gap: 18px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .gh-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .gb { display: block; height: 9px; border-radius: 5px; background: var(--surface2); }
+  .gh-head .gb { height: 7px; background: var(--surface); }
+  .gb.up { background: color-mix(in srgb, var(--up) 26%, var(--bg)); }
+  .gb.dn { background: color-mix(in srgb, var(--down) 24%, var(--bg)); }
+  .gh-s { height: 7px; background: var(--surface); }
+  .gh-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; flex-direction: initial; }
+  .gh-card { border: 1px solid var(--rule); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .gh-card svg { width: 100%; height: 34px; display: block; margin: 4px 0; }
+  .gh-card path { fill: none; stroke: color-mix(in srgb, var(--accent) 40%, var(--bg)); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .gh-meta { display: flex; justify-content: space-between; gap: 8px; }
   .soon-tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; background: var(--bg); border: 1px solid var(--rule); border-radius: 999px; padding: 8px 16px; font: 500 12.5px var(--mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink); box-shadow: 0 8px 24px var(--shadow); }
   .soon-tag .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  /* Phone view: this page in a 390 x 844 frame, for review */
+  .pv-btn { position: fixed; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); font: 500 13.5px var(--sans); cursor: pointer; box-shadow: 0 6px 20px var(--shadow); }
+  .pv-btn:hover { border-color: var(--accent); }
+  .pv { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: color-mix(in srgb, var(--ink) 55%, transparent); padding: 16px; }
+  .pv-bar { display: flex; align-items: center; gap: 12px; color: var(--bg); font: 13px var(--mono); }
+  .pv-bar button { appearance: none; height: 30px; padding: 0 12px; border: 0; border-radius: 6px; background: var(--bg); color: var(--ink); font: 500 13px var(--sans); cursor: pointer; }
+  .pv-dev { border-radius: 28px; padding: 10px; background: #0b0c0e; box-shadow: 0 20px 60px rgb(0 0 0 / 0.45); overflow: hidden; }
+  .pv-dev iframe { display: block; width: 390px; height: 844px; border: 0; border-radius: 20px; background: var(--bg); transform-origin: 0 0; }
+  [data-embed] .pv-btn, [data-embed] .pv { display: none !important; }
+  @media (max-width: 640px) { .pv-btn { display: none; } }
 </style>
 </head>
 <body>
@@ -589,18 +599,18 @@
 <div id="home">
 <section class="hero stack"><div class="hero-t"><h1 style="margin-top:0">Backtest your models and compare every experiment</h1><p class="lead">Run a trained model on real stock and crypto candles, try different configurations and see which one holds up. Change how prices are represented, which model predicts or how its predictions become trades. Every run is measured the same way.</p><div class="cta"><button type="button" class="btn pri lg" data-toast="Try Backtest opens the builder. It is the next screen we design.">Try Backtest</button><a class="btn lg" href="#/instruments">Browse instruments</a></div></div>
       <div class="card plh"><div class="plh-row"><div class="plh-col"><span class="eyebrow">Input</span><div class="plh-node ">Market data</div><ul><li>15,000+ stocks and pairs</li><li>1m to 1d candles</li><li>since 2016</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 1</span><div class="plh-node layer">Representation</div><ul><li>Renko · Kagi · P&amp;F</li><li>Heikin-Ashi · Line break</li><li>Range and volume bars</li><li>Time windows</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 2</span><div class="plh-node layer">Model</div><ul><li>Your trained model</li><li>Keras, PyTorch, ONNX</li><li>Input shape check</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 3</span><div class="plh-node layer">Decision</div><ul><li>Threshold</li><li>Stop loss</li><li>Smoothing</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Output</span><div class="plh-node ">Results</div><ul><li>Return, Sharpe</li><li>Drawdown</li><li>Trades on the chart</li></ul></div></div></div></section>
-<section id="layers" class="sec"><span class="eyebrow">How a run works</span><h2>Three layers you can swap</h2><p class="sub">Every backtest takes the same path from candles to trades. The three layers in the middle are what you change and compare.</p>
+<section id="layers" class="hsec"><span class="eyebrow">How a run works</span><h2>Three layers you can swap</h2><p class="sub">Every backtest takes the same path from candles to trades. The three layers in the middle are what you change and compare.</p>
     <div class="body layers">
       <article class="card layer-c"><span class="eyebrow">Layer 1 · Representation</span><h3>How prices become input</h3><p>Turn raw candles into what your model reads: windows, bricks or lines, with normalized indicators.</p><div class="chips"><span class="chip">Time windows</span><span class="chip">Renko</span><span class="chip">Kagi</span><span class="chip">Point &amp; Figure</span><span class="chip">Heikin-Ashi</span><span class="chip">Range bars</span></div></article>
       <article class="card layer-c"><span class="eyebrow">Layer 2 · Model</span><h3>What predicts</h3><p>Bring your own trained model. We check that it fits the input before it runs.</p><div class="chips"><span class="chip">Keras</span><span class="chip">TensorFlow</span><span class="chip">PyTorch</span><span class="chip">ONNX</span><span class="chip">scikit-learn</span></div></article>
       <article class="card layer-c"><span class="eyebrow">Layer 3 · Decision</span><h3>How predictions become trades</h3><p>Thresholds, direction, stop loss, smoothing, position size and costs.</p><div class="chips"><span class="chip">Threshold</span><span class="chip">Long only</span><span class="chip">Stop loss</span><span class="chip">Smoothing</span><span class="chip">Sizing</span></div></article>
     </div></section>
-  <section id="markets" class="sec two"><div><span class="eyebrow">Instruments</span><h2>US stocks and crypto pairs, candles from 1m to 1d</h2><p class="sub">Every US exchange through Alpaca since 2016, Binance spot pairs since their listing.</p><a class="btn" href="#/instruments">Browse instruments</a></div>
+  <section id="markets" class="hsec two"><div><span class="eyebrow">Instruments</span><h2>US stocks and crypto pairs, candles from 1m to 1d</h2><p class="sub">Every US exchange through Alpaca since 2016, Binance spot pairs since their listing.</p><a class="btn" href="#/instruments">Browse instruments</a></div>
     <div class="ilist"><div class="tblbox" id="home-rows"></div></div></section>
-  <section id="compare" class="sec two"><div><span class="eyebrow">Compare</span><h2>Every run gets the same metrics</h2><p class="sub">Change one layer, run again and see which combination holds up across market conditions.</p></div>
-    <div class="soon-card"><div class="soon-ghost" aria-hidden="true"><div class="g-row g-head"><i class="g" style="width:60%"></i><i class="g" style="width:50%"></i><i class="g" style="width:45%"></i><i class="g" style="width:55%"></i><i class="g" style="width:60%"></i></div><div class="g-row"><i class="g" style="width:70%"></i><i class="g" style="width:85%"></i><i class="g" style="width:60%"></i><i class="g up" style="width:72%"></i><i class="g" style="width:70%"></i></div><div class="g-row"><i class="g" style="width:55%"></i><i class="g" style="width:75%"></i><i class="g" style="width:70%"></i><i class="g up" style="width:58%"></i><i class="g" style="width:70%"></i></div><div class="g-row"><i class="g" style="width:65%"></i><i class="g" style="width:90%"></i><i class="g" style="width:50%"></i><i class="g dn" style="width:50%"></i><i class="g" style="width:70%"></i></div><div class="g-row"><i class="g" style="width:60%"></i><i class="g" style="width:70%"></i><i class="g" style="width:65%"></i><i class="g up" style="width:40%"></i><i class="g" style="width:70%"></i></div></div><span class="soon-tag"><span class="dot"></span>Coming soon</span></div></section>
-  <section id="experiments" class="sec two"><div><span class="eyebrow">Public experiments</span><h2>A catalog of published experiments</h2><p class="sub">Runs their authors chose to publish, each with its instrument, representation, model and decision settings and the same metrics, so anyone can look one up and run it again.</p></div>
-    <div class="soon-card"><div class="soon-ghost g-cards" aria-hidden="true"><div class="g-card"><i class="g" style="width:78%"></i><i class="g g-s" style="width:55%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 22 L14 18 L28 20 L42 12 L56 14 L70 8 L84 10 L100 4"/></svg><div class="g-meta"><i class="g up" style="width:34%"></i><i class="g g-s" style="width:26%"></i></div></div><div class="g-card"><i class="g" style="width:64%"></i><i class="g g-s" style="width:70%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 18 L14 20 L28 14 L42 16 L56 10 L70 12 L84 6 L100 8"/></svg><div class="g-meta"><i class="g up" style="width:34%"></i><i class="g g-s" style="width:26%"></i></div></div><div class="g-card"><i class="g" style="width:72%"></i><i class="g g-s" style="width:48%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 20 L14 14 L28 16 L42 8 L56 12 L70 6 L84 9 L100 3"/></svg><div class="g-meta"><i class="g up" style="width:34%"></i><i class="g g-s" style="width:26%"></i></div></div></div><span class="soon-tag"><span class="dot"></span>Coming soon</span></div></section>
+  <section id="compare" class="hsec two"><div><span class="eyebrow">Compare</span><h2>Every run gets the same metrics</h2><p class="sub">Change one layer, run again and see which combination holds up across market conditions.</p></div>
+    <div class="soon-card"><div class="soon-ghost" aria-hidden="true"><div class="gh-row gh-head"><i class="gb" style="width:60%"></i><i class="gb" style="width:50%"></i><i class="gb" style="width:45%"></i><i class="gb" style="width:55%"></i><i class="gb" style="width:60%"></i></div><div class="gh-row"><i class="gb" style="width:70%"></i><i class="gb" style="width:85%"></i><i class="gb" style="width:60%"></i><i class="gb up" style="width:72%"></i><i class="gb" style="width:70%"></i></div><div class="gh-row"><i class="gb" style="width:55%"></i><i class="gb" style="width:75%"></i><i class="gb" style="width:70%"></i><i class="gb up" style="width:58%"></i><i class="gb" style="width:70%"></i></div><div class="gh-row"><i class="gb" style="width:65%"></i><i class="gb" style="width:90%"></i><i class="gb" style="width:50%"></i><i class="gb dn" style="width:50%"></i><i class="gb" style="width:70%"></i></div><div class="gh-row"><i class="gb" style="width:60%"></i><i class="gb" style="width:70%"></i><i class="gb" style="width:65%"></i><i class="gb up" style="width:40%"></i><i class="gb" style="width:70%"></i></div></div><span class="soon-tag"><span class="dot"></span>Coming soon</span></div></section>
+  <section id="experiments" class="hsec two"><div><span class="eyebrow">Public experiments</span><h2>A catalog of published experiments</h2><p class="sub">Runs their authors chose to publish, each with its instrument, representation, model and decision settings and the same metrics, so anyone can look one up and run it again.</p></div>
+    <div class="soon-card"><div class="soon-ghost gh-cards" aria-hidden="true"><div class="gh-card"><i class="gb" style="width:78%"></i><i class="gb gh-s" style="width:55%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 22 L14 18 L28 20 L42 12 L56 14 L70 8 L84 10 L100 4"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div><div class="gh-card"><i class="gb" style="width:64%"></i><i class="gb gh-s" style="width:70%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 18 L14 20 L28 14 L42 16 L56 10 L70 12 L84 6 L100 8"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div><div class="gh-card"><i class="gb" style="width:72%"></i><i class="gb gh-s" style="width:48%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 20 L14 14 L28 16 L42 8 L56 12 L70 6 L84 9 L100 3"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div></div><span class="soon-tag"><span class="dot"></span>Coming soon</span></div></section>
 </div>
 <section id="detail" class="ilist" aria-label="Instrument" hidden></section>
 <section id="inst" class="ilist" aria-label="Instruments" hidden>
@@ -633,6 +643,8 @@
   <a href="https://candlestack.tech" target="_blank" rel="noopener">candlestack.tech</a>
 </div></footer>
 <div class="toast" id="toast" role="status" hidden></div>
+<button type="button" class="pv-btn" id="pv-open" aria-haspopup="dialog"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M11 18h2"></path></svg>Phone view</button>
+<div class="pv" id="pv" role="dialog" aria-label="Phone view" hidden><div class="pv-bar"><span>Phone · 390 × 844</span><button type="button" id="pv-close">Close</button></div><div class="pv-dev" id="pv-dev"><iframe id="pv-frame" title="This page at phone width"></iframe></div></div>
 
 <script>
 let toastTimer = 0;
@@ -668,6 +680,21 @@ document.addEventListener('click', e => {
   const tr = e.target.closest('tr[data-href]');
   if (tr && !e.target.closest('a, button')) location.hash = tr.dataset.href;
 });
+
+// Phone view: the page itself in a 390 px frame, scaled to fit the window.
+(() => {
+  const box = document.getElementById('pv'), dev = document.getElementById('pv-dev'), frame = document.getElementById('pv-frame');
+  const fit = () => { const k = Math.min(1, (innerHeight - 100) / 864, (innerWidth - 40) / 410); frame.style.transform = `scale(${k})`; dev.style.width = `${390 * k + 20}px`; dev.style.height = `${844 * k + 20}px`; };
+  document.getElementById('pv-open').addEventListener('click', () => {
+    const html = '<!doctype html>' + document.documentElement.outerHTML.replace('<html', '<html data-embed="1"');
+    frame.srcdoc = html; box.hidden = false; fit();
+  });
+  const close = () => { box.hidden = true; frame.srcdoc = ''; };
+  document.getElementById('pv-close').addEventListener('click', close);
+  box.addEventListener('click', (e) => { if (e.target === box) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !box.hidden) close(); });
+  addEventListener('resize', () => { if (!box.hidden) fit(); });
+})();
 window.addEventListener('hashchange', route);
 window.addEventListener('popstate', route);
 route();
