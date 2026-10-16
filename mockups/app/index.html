@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CandleStack App</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* The page is the app itself, the Workspace dashboard. Colors and controls: the builder artifact's. */
+  :root {
+    --bg: #fafaf9; --ink: #141414; --muted: #686868; --rule: #e7e5e2; --accent: #0f766e;
+    --warn: #a15c07; --down: #b42318; --up: #1a7f37; --candle-up: #2e9e44; --candle-down: #f23645;
+    --grid: rgb(28 25 23 / 0.09); --shadow: rgb(0 0 0 / 0.08); --on-accent: #fafaf9; --tile: #ffffff; --tile-ink: #141414;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0f11; --ink: #ecedee; --muted: #9ba1a6; --rule: #23272b; --accent: #3cc7a6;
+      --warn: #e8b45a; --down: #f0616d; --up: #43b049; --candle-up: #43b049; --candle-down: #f23645;
+      --grid: rgb(230 232 234 / 0.075); --shadow: rgb(0 0 0 / 0.5); --on-accent: #0d0f11; --tile: #ffffff;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0f11; --ink: #ecedee; --muted: #9ba1a6; --rule: #23272b; --accent: #3cc7a6;
+    --warn: #e8b45a; --down: #f0616d; --up: #43b049; --candle-up: #43b049; --candle-down: #f23645;
+    --grid: rgb(230 232 234 / 0.075); --shadow: rgb(0 0 0 / 0.5); --on-accent: #0d0f11; --tile: #ffffff;
+    color-scheme: dark;
+  }
+  :root {
+    --surface: color-mix(in srgb, var(--ink) 5%, var(--bg));
+    --surface2: color-mix(in srgb, var(--ink) 9%, var(--bg));
+    --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
+    --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    background: var(--surface); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 56px;
+  }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { text-wrap: balance; }
+  .mono { font-family: var(--mono); }
+  .muted { color: var(--muted); }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .eyebrow { font: 500 11px/16px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .hint { font-size: 12px; color: var(--muted); }
+  .wrap { max-width: 1360px; margin: 0 auto; }
+
+  /* The app frame */
+  .frame {
+    border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px var(--shadow);
+    background-color: var(--bg);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .ahdr { display: flex; align-items: center; gap: 20px; height: 56px; padding: 0 20px; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--bg) 88%, transparent); }
+  .home-link { appearance: none; border: 0; background: none; padding: 0; line-height: 0; border-radius: 6px; flex: none; }
+  .logo { height: 28px; width: 152px; display: block; }
+  .lg-a { fill: var(--accent); } .lg-b { fill: var(--bg); } .lg-c { fill: var(--ink); }
+  .anav { display: flex; gap: 18px; font-size: 14px; }
+  .anav span { color: var(--muted); } .anav span.on { color: var(--ink); font-weight: 500; }
+  .ahdr .sp { flex: 1; }
+  .ahdr .r { display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 30px; height: 30px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font: 600 12px var(--mono); }
+  .abody { max-width: 1200px; margin: 0 auto; padding: 28px 24px 40px; }
+  .afoot { border-top: 1px solid var(--rule); background: var(--bg); }
+  .afoot div { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 12px; color: var(--muted); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; }
+  .btn:hover { background: var(--surface); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn.pri { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.pri:hover { background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
+  .btn.ghost { border-color: transparent; background: transparent; }
+  .btn.ghost:hover { background: var(--surface); }
+  .btn.sm { height: 28px; padding: 0 10px; font-size: 13px; }
+  .btn.lg { height: 42px; padding: 0 20px; font-size: 15px; }
+  .icon { width: 34px; padding: 0; }
+  .i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .card { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; }
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+  .ttl { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .ttl h1 { font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.025em; }
+  .ttl p { color: var(--muted); margin-top: 4px; }
+
+  /* Controls */
+  .f { display: flex; flex-direction: column; gap: 8px; }
+  .lab { font-size: 13px; font-weight: 500; }
+  .lab-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+  .seg button { appearance: none; border: 1px solid var(--rule); background: var(--bg); height: 30px; min-width: 40px; padding: 0 10px; border-radius: 6px; font: 500 13px var(--mono); color: var(--muted); cursor: pointer; }
+  .seg button:hover { color: var(--ink); }
+  .seg button.on { color: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .inp { height: 34px; border: 1px solid var(--rule); border-radius: 6px; padding: 0 10px; background: var(--bg); font: 14px var(--mono); color: var(--ink); width: 100%; min-width: 0; }
+  .row2 { display: flex; align-items: center; gap: 8px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .pick { display: flex; align-items: center; gap: 12px; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; background: var(--bg); }
+  .pick-t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .pick-t span { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile { width: 40px; height: 40px; flex: none; border-radius: 4px; background: var(--tile); color: var(--tile-ink); box-shadow: inset 0 0 0 1px rgb(20 20 20 / 0.12); display: grid; place-items: center; font: 600 10px var(--mono); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip { appearance: none; font: 500 12px var(--mono); padding: 3px 9px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); }
+  button.chip { cursor: pointer; }
+  .chip.later { color: var(--muted); border-style: dashed; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .opt { appearance: none; text-align: left; border: 1px solid var(--rule); border-radius: 8px; padding: 12px; background: var(--bg); cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+  .opt:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--rule)); }
+  .opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .opt b { font-size: 14px; } .opt span { font-size: 12.5px; color: var(--muted); }
+  .opt-fig { height: 30px; margin-bottom: 4px; }
+  .opt-fig svg { height: 30px; width: auto; display: block; }
+  .params { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+  .pm { border: 1px solid var(--rule); border-radius: 6px; padding: 7px 10px; display: flex; flex-direction: column; gap: 1px; background: var(--bg); }
+  .pm .k { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .pm .v { font: 500 13px var(--mono); }
+  .pm.is-later { border-style: dashed; } .pm.is-later .v { color: var(--muted); }
+  .badge { display: inline-block; font: 500 11px/16px var(--mono); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
+  .badge.ok { color: var(--up); border-color: color-mix(in srgb, var(--up) 45%, var(--rule)); }
+  .badge.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--rule)); }
+  .badge.later { border-style: dashed; }
+  .shape { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; padding: 10px 12px; border-radius: 6px; background: var(--accent-soft); }
+  .shape b { font: 600 18px var(--mono); color: var(--accent); }
+  .check { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--rule); font-size: 13px; }
+  .check.ok { border-color: color-mix(in srgb, var(--up) 40%, var(--rule)); }
+  .check.warn { border-color: color-mix(in srgb, var(--warn) 45%, var(--rule)); }
+  .check .dot { flex: none; width: 8px; height: 8px; border-radius: 999px; margin-top: 6px; background: var(--up); }
+  .check.warn .dot { background: var(--warn); }
+  .models { display: flex; flex-direction: column; gap: 6px; }
+  .model { appearance: none; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); cursor: pointer; }
+  .model.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .model.off { cursor: default; } .model.off .mn { color: var(--muted); }
+  .radio { width: 16px; height: 16px; border-radius: 999px; border: 1.5px solid var(--rule); display: grid; place-items: center; }
+  .model.on .radio { border-color: var(--accent); } .model.on .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--accent); }
+  .mn, .mm { display: block; }
+  .mn { font-weight: 500; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mm { font: 12px var(--mono); color: var(--muted); }
+  .drop { border: 1.5px dashed var(--rule); border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .tm { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); min-width: 0; }
+  .tm .k { font-size: 12px; color: var(--muted); }
+  .tm .v { font: 600 21px/1.3 var(--mono); font-variant-numeric: tabular-nums; }
+  .tm .s { font: 11.5px var(--mono); color: var(--muted); }
+  .run-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tblwrap { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th { font-weight: 500; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  .tbl td { padding: 8px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-family: var(--mono); }
+  .tbl th.num { text-align: right; }
+
+  /* Charts */
+  .chart svg { display: block; width: 100%; height: auto; }
+  .ax { fill: var(--muted); font: 11px var(--mono); }
+  .gl { stroke: var(--rule); stroke-width: 1; }
+  .cu { fill: var(--candle-up); stroke: var(--candle-up); }
+  .cd { fill: var(--candle-down); stroke: var(--candle-down); }
+  .br { stroke: var(--bg); stroke-width: 0.5; }
+  .kgu { stroke: var(--candle-up); fill: none; } .kgd { stroke: var(--candle-down); fill: none; }
+  .hold { fill: var(--candle-up); opacity: 0.08; } .hold.s { fill: var(--candle-down); }
+  .mk-in { fill: var(--candle-up); } .mk-ins { fill: var(--candle-down); } .mk-out { fill: var(--muted); }
+  .win { fill: var(--accent); opacity: 0.1; stroke: var(--accent); stroke-dasharray: 4 3; }
+  .wl { fill: var(--accent); font: 500 11px var(--mono); }
+  .pb { fill: var(--muted); opacity: 0.55; } .pb-l { fill: var(--candle-up); } .pb-s { fill: var(--candle-down); } .pb-n { fill: var(--muted); opacity: 0.3; }
+  .tl { stroke: var(--accent); stroke-width: 1.25; stroke-dasharray: 4 3; }
+  .eq { fill: none; stroke: var(--accent); stroke-width: 2; } .eqa { fill: var(--accent); opacity: 0.1; } .eqd { fill: var(--accent); }
+  .bh { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .lgd-s { fill: var(--accent); font: 500 12px var(--mono); } .lgd-b { fill: var(--muted); font: 500 12px var(--mono); }
+  .mxc { fill: var(--accent); } .mxo { fill: var(--accent-soft); stroke: var(--accent); }
+  .arr { stroke: var(--muted); stroke-width: 1.5; } .arrh { fill: var(--muted); }
+  .sk { fill: none; stroke-width: 1.5; } .sk.u { stroke: var(--candle-up); } .sk.d { stroke: var(--candle-down); }
+  .cap { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 12px var(--mono); color: var(--muted); }
+  .mx-row { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 16px; align-items: center; }
+  .mx { width: 100%; height: auto; display: block; }
+
+  /* B: pipeline */
+  .pl-nodes { display: flex; align-items: stretch; overflow-x: auto; padding: 2px 2px 10px; }
+  .node { appearance: none; flex: 1 0 168px; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg); padding: 12px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .node.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .node.layer { border-top: 3px solid var(--accent-soft); }
+  .node b { font-size: 14px; } .node .nv { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .node .no { font: 11.5px var(--mono); color: var(--accent); }
+  .wire { flex: 0 0 26px; align-self: center; height: 2px; background: var(--rule); position: relative; }
+  .wire::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left: 6px solid var(--rule); border-right: 0; }
+  .pl-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 16px; margin-top: 14px; align-items: start; }
+  .pane { padding: 20px; }
+  .pane h3 { font-size: 16px; margin-bottom: 4px; }
+
+  /* Notes */
+
+  @media (max-width: 980px) {
+    .lc, .pl-body, .two-ch { grid-template-columns: minmax(0, 1fr); }
+    .lc-main { position: static; }
+  }
+  @media (max-width: 640px) {
+    .anav, .hide-sm { display: none; }
+    .ahdr { gap: 10px; padding: 0 12px; }
+    .logo { width: 130px; height: 24px; }
+    .abody { padding: 20px 14px 28px; }
+    .sn-text { font-size: 20px; }
+    .wz-prog .sv { display: none; }
+    .wz-prog .l { font-size: 11px; }
+    .wz-card, .sn, .pane { padding: 18px; }
+    .mx-row { grid-template-columns: minmax(0, 1fr); }
+    .cell { grid-template-columns: 30px minmax(0, 1fr); }
+    .pop .muted { display: none; }
+  }
+  /* Header: production's (frontend/src/components/Header.tsx). A 1152 px row inside 24 px, nav 18 px apart.
+     Signed in, Sign in becomes the account menu and Try Backtest becomes New backtest. */
+  .ahdr { display: block; height: auto; padding-block: 0; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); position: relative; z-index: 30; }
+  .ahdr-in { max-width: 1152px; margin: 0 auto; height: 56px; display: flex; align-items: center; gap: 20px; }
+  .anav button { appearance: none; border: 0; background: none; padding: 0; font: 14px var(--sans); color: var(--muted); cursor: pointer; }
+  .anav button:hover, .anav button.on { color: var(--ink); }
+  .anav button.on { font-weight: 500; }
+  .ahdr .r { position: relative; }
+  .av-btn { appearance: none; border: 0; padding: 0; cursor: pointer; border-radius: 999px; line-height: 0; }
+  .av-btn:hover .avatar, .av-btn[aria-expanded="true"] .avatar { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .amenu { position: absolute; right: 0; top: calc(100% + 10px); width: 240px; z-index: 35; background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 10px 28px var(--shadow); padding: 4px; display: flex; flex-direction: column; }
+  .amenu .who { padding: 8px 10px 10px; display: flex; flex-direction: column; border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
+  .amenu .who b { font-weight: 500; } .amenu .who span { font-size: 12.5px; color: var(--muted); }
+  .amenu button { appearance: none; text-align: left; padding: 8px 10px; border: 0; background: none; border-radius: 6px; font: 14px var(--sans); color: var(--ink); cursor: pointer; }
+  .amenu button:hover { background: var(--surface); }
+  .amenu button { display: flex; align-items: center; gap: 10px; }
+  .amenu button .i { flex: none; color: var(--muted); }
+  .amenu button.out, .amenu button.out .i { color: var(--down); }
+  .amenu button.out:hover { background: color-mix(in srgb, var(--down) 10%, transparent); }
+  .amenu hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; }
+  .abody { max-width: 1200px; width: 100%; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+  .afoot .cred { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-left: auto; }
+  .afoot a { color: inherit; text-decoration: none; }
+  .afoot a:hover { color: var(--ink); }
+  .afoot .cred a { text-decoration: underline; }
+  .afoot u, .afoot .cred a { text-underline-offset: 2px; }
+  .afoot div { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+
+  /* The page is the app: no review bar, no frame around it */
+  body { padding-left: 0; padding-right: 0; padding-block: 0; }
+  .frame { border: 0; border-radius: 0; box-shadow: none; overflow: visible; min-height: 100vh; display: flex; flex-direction: column; }
+  .frame > main { flex: 1; }
+  .nb-i { display: none; }
+
+  /* Shared bits */
+  .badge.bad { color: var(--down); border-color: color-mix(in srgb, var(--down) 45%, var(--rule)); }
+  .badge.run { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
+  .badge.soon { border-style: dashed; }
+  .prog { display: block; height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; min-width: 60px; }
+  .prog i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+  .back { appearance: none; border: 0; background: none; padding: 0; margin-bottom: 14px; color: var(--muted); font: 13px var(--sans); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+  .back:hover { color: var(--ink); }
+  /* Star: a 28 px target, grows a little on hover. A set star fades on hover, so it reads as "click to remove". */
+  .star { appearance: none; flex: none; width: 28px; height: 28px; margin: -4px -2px; display: inline-grid; place-items: center; border: 0; border-radius: 6px; background: none; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--muted) 55%, var(--bg)); font-size: 19px; line-height: 1; }
+  .star:hover { background: var(--surface); color: var(--warn); transform: scale(1.12); }
+  .star.on { color: var(--warn); }
+  .star.on:hover { color: color-mix(in srgb, var(--warn) 45%, var(--bg)); }
+  .rid { font: 500 13px var(--mono); }
+  .ck { appearance: none; width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--rule); background: var(--bg); padding: 0; cursor: pointer; display: grid; place-items: center; color: var(--on-accent); font-size: 11px; line-height: 1; }
+  .ck.on { background: var(--accent); border-color: var(--accent); }
+  .ck.on::after { content: "✓"; }
+  .ichips { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
+  .ichips .chip { padding: 1px 7px; font-size: 11.5px; }
+  .tbl td.wrapok { white-space: normal; min-width: 180px; }
+  .tbl tr.rl { cursor: pointer; }
+  .tbl tr.rl:hover td { background: var(--surface); }
+  .tbl .sub { display: block; font-size: 12px; color: var(--muted); }
+  .btn.danger { color: var(--down); border-color: color-mix(in srgb, var(--down) 45%, var(--rule)); }
+  .btn.danger.pri { background: var(--down); border-color: var(--down); color: var(--on-accent); }
+  .sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sec-h h2 { font-size: 16px; font-weight: 600; }
+  .link { appearance: none; border: 0; background: none; padding: 0; color: var(--accent); font: 500 13px var(--sans); cursor: pointer; }
+  .link:hover { text-decoration: underline; text-underline-offset: 2px; }
+  .err { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--down) 40%, var(--rule)); font-size: 13px; }
+  .err .dot { flex: none; width: 8px; height: 8px; border-radius: 999px; margin-top: 6px; background: var(--down); }
+
+  /* Models */
+  .mlist { display: flex; flex-direction: column; gap: 6px; }
+  .mrow { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); }
+  .mrow .mn { font-weight: 500; }
+  .mrow .bd { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+  .mrow .mm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mrow .ru { font: 12px var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
+
+  /* Static pipeline (run page, builder stand-in) */
+  .node.static { cursor: default; }
+  .node.unset { border-style: dashed; }
+  .node.unset .nv, .node.unset b { color: var(--muted); }
+  .standin { padding: 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; border-style: dashed; }
+  .standin p { color: var(--muted); max-width: 62ch; margin-top: 4px; }
+
+  /* Settings */
+  .set { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .set-nav { display: flex; flex-direction: column; gap: 2px; }
+  .set-nav button { appearance: none; text-align: left; padding: 7px 10px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 14px var(--sans); cursor: pointer; white-space: nowrap; }
+  .set-nav button:hover { color: var(--ink); }
+  .set-nav button.on { background: var(--surface2); color: var(--ink); font-weight: 500; }
+  .set-p { padding: 24px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  .set-p h2 { font-size: 18px; letter-spacing: -0.01em; }
+  .set-p .lead { color: var(--muted); margin-top: 2px; }
+  .fg { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 14px 20px; align-items: center; }
+  .fg > .lab { color: var(--muted); font-weight: 400; font-size: 14px; }
+  .fg .inp { max-width: 340px; }
+  .fg .two { display: flex; gap: 8px; align-items: center; max-width: 340px; }
+  .set-f { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--rule); }
+  .meter { display: block; height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; max-width: 340px; }
+  .meter i { display: block; height: 100%; background: var(--accent); }
+  .soon { border: 1px dashed var(--rule); border-radius: 8px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+  .soon p { color: var(--muted); font-size: 13px; margin-top: 2px; max-width: 56ch; }
+  .danger-z { border: 1px solid color-mix(in srgb, var(--down) 35%, var(--rule)); border-radius: 8px; padding: 14px 16px; display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .danger-z p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  @media (max-width: 980px) {
+    .set { grid-template-columns: minmax(0, 1fr); }
+    .set-nav { flex-direction: row; overflow-x: auto; padding-bottom: 2px; }
+  }
+  @media (max-width: 639px) {
+    .afoot .cred { margin-left: 0; }
+  }
+  @media (max-width: 640px) {
+    .ahdr, .abody, .afoot div { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+    .ahdr-in { gap: 10px; }
+    .nb-t { display: none; }
+    .nb-i { display: block; }
+    .btn.nb { width: 34px; padding: 0; }
+    .fg { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .fg > .lab { margin-top: 8px; }
+    .set-p { padding: 18px; }
+    .mrow { grid-template-columns: minmax(0, 1fr); }
+    .mrow .ru { text-align: left; }
+  }
+
+  /* D: workspace. A sidebar beside the page. On the dashboard, last and best backtests on the left,
+     starred backtests and models on the right. */
+  :root { --fw-lift: 0%; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --fw-lift: 25%; } }
+  :root[data-theme="dark"] { --fw-lift: 25%; }
+  .dd-ws { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .dd-main { min-width: 0; }
+  .dd-side { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
+  .dd-nav { appearance: none; display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 14px var(--sans); cursor: pointer; text-align: left; white-space: nowrap; }
+  .dd-nav:hover { color: var(--ink); background: var(--surface); }
+  .dd-nav.on { color: var(--ink); background: var(--surface2); font-weight: 500; }
+  .dd-nav .dd-n { margin-left: auto; padding-left: 8px; font: 400 12px var(--mono); color: var(--muted); }
+  .dd-sfoot { margin-top: 10px; padding: 12px 10px 4px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 6px; }
+  .dd-sfoot .meter { max-width: none; height: 6px; }
+  .dd-s { font: 12px var(--mono); }
+
+  .dd-dash { display: flex; flex-direction: column; gap: 16px; }
+  .dd-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 356px); gap: 16px; align-items: start; }
+  .dd-cols.one { grid-template-columns: minmax(0, 1fr); }
+  .dd-card .tbl th, .dd-card .tbl td { padding-left: 10px; padding-right: 10px; }
+  .dd-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .dd-card { padding: 16px; min-width: 0; }
+  .dd-card .sec-h > div { display: flex; align-items: baseline; gap: 8px; }
+
+  /* Running now */
+  .dd-pr { display: flex; align-items: center; gap: 8px; margin-top: 4px; font: 12px var(--mono); color: var(--muted); }
+  .dd-pr .prog { flex: 1 1 140px; max-width: 160px; }
+
+  /* Side cards */
+  .dd-list { display: flex; flex-direction: column; }
+  .dd-br, .dd-st, .dd-sr { appearance: none; border: 0; background: none; color: inherit; font: inherit; text-align: left; width: 100%; cursor: pointer; border-radius: 6px; }
+  .dd-br, .dd-st { display: grid; gap: 10px; align-items: center; padding: 8px 6px; }
+  .dd-br { grid-template-columns: 14px minmax(0, 1fr) auto auto; }
+  .dd-st { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .dd-br:hover, .dd-st:hover, .dd-sr:hover { background: var(--surface); }
+  .dd-rk { font: 12px var(--mono); color: var(--muted); }
+  .dd-bm { display: flex; flex-direction: column; min-width: 0; }
+  .dd-b1 { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dd-b2 { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dd-bv { display: flex; flex-direction: column; align-items: flex-end; font: 12px var(--mono); white-space: nowrap; }
+  .dd-bv b { font: 600 14px var(--mono); }
+  .dd-br .spk { flex: none; }
+  /* Starred: an icon by the title, four rows, then More */
+  .dd-card .sec-h > .dd-h { align-items: center; gap: 10px; }
+  .dd-ic { flex: none; width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+  .dd-ic .i { width: 15px; height: 15px; }
+  .dd-sr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 6px; }
+  .dd-mr { grid-template-columns: auto auto minmax(0, 1fr) auto; }
+  .dd-fw { flex: none; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: color-mix(in srgb, var(--fw) 12%, transparent); }
+  .dd-fw svg { width: 15px; height: 15px; fill: color-mix(in srgb, var(--fw), #fff var(--fw-lift)); }
+  .dd-sb { row-gap: 1px; }
+  .dd-sb > .star { grid-row: 1 / 3; }
+  .dd-sb > .dd-b2 { grid-column: 2 / 4; }
+  .dd-r1, .dd-r2 { text-align: right; white-space: nowrap; font-family: var(--mono); }
+  .dd-r1 { font-size: 14px; font-weight: 600; }
+  .dd-r2 { font-size: 11px; color: var(--muted); }
+  .dd-sr .dd-b1 { display: flex; align-items: center; gap: 6px; }
+  .dd-sr .ichips .chip { padding: 0 6px; font-size: 11px; }
+  .dd-mn { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .dd-vec { font: 11.5px var(--mono); }
+  .dd-sr .dd-bv .muted { font-size: 11px; }
+  .dd-more { appearance: none; width: 100%; margin-top: 6px; padding: 10px 6px 0; border: 0; border-top: 1px solid var(--rule); background: none; display: flex; justify-content: space-between; gap: 10px; font: 500 12.5px var(--sans); color: var(--muted); cursor: pointer; }
+  .dd-more:hover { color: var(--ink); }
+  /* Best backtests: headings rank the list */
+  .dd-best .dd-rk { width: 28px; color: var(--muted); font: 12px var(--mono); }
+  .dd-best .dd-b1 { display: flex; align-items: center; gap: 6px; }
+  .dd-sort { appearance: none; border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; white-space: nowrap; }
+  .dd-sort:hover, .dd-sort.on { color: var(--ink); }
+  .dd-sort.on { font-weight: 600; }
+  .dd-best td.dd-on { font-weight: 600; }
+
+  /* Get started */
+  .dd-gss { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .dd-gs { appearance: none; width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .dd-gs:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--rule)); }
+  .dd-gs .n { width: 22px; height: 22px; border-radius: 999px; border: 1px solid var(--rule); display: grid; place-items: center; font: 500 11px var(--mono); }
+  .dd-gs:first-child .n { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .dd-gs b { font-weight: 500; }
+  .dd-gs .h { display: block; font-size: 12.5px; color: var(--muted); }
+  .dd-gs .ar { color: var(--muted); }
+
+  /* Backtests page: tools over a table that fits, columns drop as the screen narrows */
+  .bt-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .bt-q { position: relative; flex: 1 1 260px; max-width: 384px; }
+  /* The Instruments page's filter: a 34 x 200 button that sums up the choice, a panel under it */
+  .fp-w { position: relative; flex: none; }
+  .fp-t { appearance: none; display: flex; align-items: center; gap: 8px; width: 200px; height: 34px; padding: 0 10px 0 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--muted); font: 14px var(--sans); text-align: left; cursor: pointer; }
+  .fp-t:hover, .fp-t.open { color: var(--ink); }
+  .fp-t.open { border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); }
+  .fp-sum { flex: 1; min-width: 0; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fp-chev { color: var(--muted); transition: transform 0.15s; }
+  .fp-t.open .fp-chev { transform: rotate(180deg); }
+  .fp { position: absolute; left: 0; top: calc(100% + 6px); z-index: 40; width: 412px; display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 16px; padding: 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); box-shadow: 0 10px 28px var(--shadow); font-size: 14px; }
+  .fp-h { margin-bottom: 8px; font-size: 12px; font-weight: 500; color: var(--muted); }
+  .fp-s [role=listbox] { margin: 0 -4px; display: flex; flex-direction: column; }
+  .fp-o { appearance: none; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 0; border-radius: 4px; background: none; color: var(--ink); font: inherit; text-align: left; white-space: nowrap; cursor: pointer; }
+  .fp-o:hover { background: var(--surface); }
+  .fp-o > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .fp-n { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .fp-ck { flex: none; color: var(--accent); visibility: hidden; }
+  .fp-o.on .fp-ck { visibility: visible; }
+  .bt-q .i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .bt-q .inp { height: 36px; padding-left: 36px; font-family: var(--sans); }
+  .bt-q .i { left: 12px; }
+  .bt-card { overflow: hidden; }
+  .bt-t th, .bt-t td { padding-left: 10px; padding-right: 10px; }
+  .bt-t .dd-sort { font-weight: 500; }
+  .bt-m { display: inline-flex; align-items: center; gap: 7px; }
+  .bt-none { text-align: center; padding: 24px; }
+  /* The Instruments page's pager */
+  .pg { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+  .pg-l { appearance: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink); font: 14px var(--sans); cursor: pointer; }
+  .pg-l:hover { background: var(--surface); }
+  .pg-l.off { opacity: 0.4; cursor: default; }
+  .pg-l.off:hover { background: var(--bg); }
+
+  /* Models page: square tiles */
+  .md-up { width: 300px; flex: none; }
+  .md-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap: 16px; }
+  .md-t { aspect-ratio: 1 / 1; min-width: 0; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .md-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .md-top .dd-fw { width: 36px; height: 36px; border-radius: 9px; }
+  .md-top .dd-fw svg { width: 19px; height: 19px; }
+  .md-top .star { font-size: 21px; margin: -4px -6px 0 0; }
+  .md-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .md-name b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .md-vec { font: 12px var(--mono); color: var(--muted); }
+  .md-st { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; border-top: 1px solid var(--rule); }
+  .md-st > div { display: flex; flex-direction: column; }
+  .md-st b { font: 600 15px var(--mono); }
+  .md-acts { display: flex; gap: 4px; margin: 0 -8px -6px; min-height: 28px; align-items: center; }
+  .md-acts .hint { padding: 0 8px; }
+  .md-acts .btn .i { width: 14px; height: 14px; }
+  .md-del:hover { color: var(--down); }
+  .md-f { display: flex; flex-direction: column; gap: 6px; }
+  .md-in { display: flex; align-items: center; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); }
+  .md-in:focus-within { border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); }
+  .md-in .inp { border: 0; background: none; font-family: var(--sans); }
+  .md-in .inp:focus-visible { outline: none; }
+  .md-ext { padding: 0 12px; font: 14px var(--mono); color: var(--muted); border-left: 1px solid var(--rule); align-self: stretch; display: grid; place-items: center; background: var(--surface); border-radius: 0 6px 6px 0; }
+
+  /* Settings: cards in two columns, the account card across the bottom */
+  .st-id { display: inline-flex; align-items: center; gap: 8px; }
+  .st-id code { font: 13px var(--mono); padding: 3px 8px; border-radius: 5px; background: var(--surface); }
+  .st-tabs { display: flex; gap: 2px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
+  .st-tabs button { appearance: none; position: relative; padding: 9px 12px 11px; border: 0; background: none; color: var(--muted); font: 14px var(--sans); cursor: pointer; transition: color 0.15s; }
+  .st-tabs button:hover { color: var(--ink); }
+  .st-tabs button.on { color: var(--ink); font-weight: 500; }
+  .st-tabs button.on::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--accent); }
+  .st-one { max-width: 720px; }
+  .st-one.in { animation: fx-up 0.2s ease-out; }
+  .st-card { display: flex; flex-direction: column; gap: 4px; }
+  .st-lead { margin: -4px 0 8px; }
+  .st-r { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--rule); }
+  .st-card .sec-h + .st-r { border-top: 0; }
+  .st-l { display: flex; flex-direction: column; font-size: 13.5px; }
+  .st-l .hint { font-size: 11.5px; }
+  .st-c { min-width: 0; }
+  .st-c .inp { max-width: 260px; font-family: var(--sans); }
+  .st-c .seg button { font-family: var(--sans); }
+  .st-two { display: flex; gap: 8px; align-items: center; }
+  .st-two .inp { max-width: 120px; font-family: var(--mono); font-size: 13px; }
+  .st-meter { display: flex; flex-direction: column; gap: 6px; max-width: 260px; }
+  .st-meter .meter { max-width: none; height: 6px; }
+  .st-f { display: flex; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--rule); }
+  .st-me { display: flex; align-items: center; gap: 12px; padding: 4px 0 12px; }
+  .st-me > span:last-child { display: flex; flex-direction: column; }
+  .st-av { width: 44px; height: 44px; font-size: 15px; }
+  .st-ssos { display: flex; flex-direction: column; gap: 8px; }
+  .st-sso { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; }
+  .st-si { flex: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: var(--surface); }
+  .st-si svg { width: 18px; height: 18px; }
+  .st-sn { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .st-one { display: flex; flex-direction: column; gap: 16px; }
+  .st-keys { display: flex; flex-direction: column; gap: 8px; }
+  .st-key { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; }
+  .st-kn { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .st-kn code, .st-docs code { font: 12px var(--mono); }
+  .st-empty { padding: 6px 0; }
+  .st-docs { justify-content: space-between; align-items: center; margin-top: 8px; }
+  .st-mcp .sec-h .cs-tag.st-soon { position: static; transform: none; padding: 5px 11px; font-size: 11px; box-shadow: none; }
+  .st-full { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+  .st-full code { flex: 1; min-width: 0; font: 13px var(--mono); overflow-wrap: anywhere; }
+  .st-rtop { align-items: start; }
+  .st-dirs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 420px; }
+  .st-dir { appearance: none; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); color: inherit; font: inherit; text-align: left; cursor: pointer; transition: border-color 0.15s, background-color 0.15s, transform 0.15s; }
+  .st-dir:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); transform: translateY(-1px); }
+  .st-dir.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+  .st-dir .hint { font-size: 11.5px; line-height: 1.35; }
+  .st-arr { display: flex; gap: 2px; margin-bottom: 2px; }
+  .st-arr .i { color: var(--up); }
+  .st-arr .i.dn { color: var(--down); }
+  .st-sl { display: flex; align-items: center; gap: 12px; max-width: 320px; }
+  .st-sl input[type=range] { flex: 1; appearance: none; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--accent) var(--p), var(--surface2) var(--p)); cursor: pointer; }
+  .st-sl input[type=range]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 999px; background: var(--bg); border: 2px solid var(--accent); box-shadow: 0 1px 4px var(--shadow); transition: transform 0.15s; }
+  .st-sl input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .st-sl input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 999px; background: var(--bg); border: 2px solid var(--accent); }
+  .st-val { min-width: 52px; padding: 3px 8px; border-radius: 6px; background: var(--surface); font: 600 13px var(--mono); text-align: center; }
+  .st-unit { max-width: 260px; }
+  .st-unit .md-ext { white-space: nowrap; font-size: 13px; }
+  .st-unit .inp { font-family: var(--mono); }
+  .st-bt { width: 300px; }
+  .st-bk { flex: none; min-width: 40px; padding: 2px 6px; border-radius: 5px; background: var(--surface2); color: var(--ink); font: 600 11.5px var(--mono); text-align: center; }
+  .st-bp { width: 340px; display: flex; flex-direction: column; gap: 2px; padding: 6px; }
+  .st-bo { height: auto; padding: 8px; align-items: center; }
+  .st-bn { display: flex; flex-direction: column; min-width: 0; white-space: normal; }
+  .st-bn .hint { font-size: 11.5px; }
+  .st-sw { appearance: none; position: relative; width: 38px; height: 22px; border: 0; border-radius: 999px; background: var(--surface2); cursor: pointer; transition: background-color 0.18s; }
+  .st-sw i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 999px; background: var(--bg); box-shadow: 0 1px 3px var(--shadow); transition: transform 0.18s; }
+  .st-sw.on { background: var(--accent); }
+  .st-sw.on i { transform: translateX(16px); }
+  .calm *, .calm *::before, .calm *::after { animation: none !important; transition: none !important; }
+  .st-app { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
+  .st-app > div { display: flex; flex-direction: column; gap: 2px; }
+  .st-app .cs-tag.st-soon { position: static; transform: none; flex: none; padding: 6px 12px; font-size: 11px; box-shadow: none; }
+  .st-danger { border-color: color-mix(in srgb, var(--down) 30%, var(--rule)); }
+  .st-danger .dd-ic { background: color-mix(in srgb, var(--down) 12%, var(--bg)); color: var(--down); }
+  .st-dz { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--rule); }
+  .st-card .sec-h + .st-dz { border-top: 0; }
+  .st-dz > div { display: flex; flex-direction: column; gap: 2px; }
+
+  @media (max-width: 980px) {
+    .dd-ws { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .dd-side { flex-direction: row; overflow-x: auto; padding: 4px; }
+    .dd-nav { width: auto; flex: none; }
+    .dd-sfoot { display: none; }
+  }
+  @media (max-width: 860px) {
+    .dd-gss { grid-template-columns: minmax(0, 1fr); }
+    .dd-cols { display: flex; flex-direction: column; align-items: stretch; }
+    .dd-col { display: contents; }
+  }
+  @media (max-width: 1100px) {
+    .bt-t .c-tr { display: none; }
+  }
+  @media (max-width: 1060px) {
+    .bt-t .c-dd { display: none; }
+  }
+  @media (max-width: 760px) {
+    .bt-t .c-when { display: none; }
+  }
+  @media (max-width: 560px) {
+    .bt-t .c-model { display: none; }
+  }
+  @media (max-width: 420px) {
+    .bt-t .c-sh { display: none; }
+  }
+  @media (max-width: 640px) {
+    .dd-card { padding: 12px; }
+    .dd-pr .prog { flex-basis: 90px; }
+  }
+
+  /* Quick actions: three cards under the greeting */
+  .qa { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .qa-c { appearance: none; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg); color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+  .qa-c:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); background: var(--surface); }
+  .qa-c.pri { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, var(--rule)); }
+  .qa-c.pri .qa-i { background: var(--accent); color: var(--on-accent); }
+  .qa-i { flex: none; width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: var(--surface2); color: var(--ink); }
+  .qa-i .i { width: 18px; height: 18px; }
+  .qa-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .qa-t b { font-weight: 600; }
+  .qa-t .h, .mdl .h { font-size: 12.5px; color: var(--muted); }
+  .qa-fws { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .fw-mini { width: 14px; height: 14px; fill: color-mix(in srgb, var(--fw), #fff var(--fw-lift)); flex: none; }
+
+  /* Modal */
+  .mbg { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: color-mix(in srgb, #000 45%, transparent);
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .mdl { width: min(560px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 20px 50px var(--shadow); }
+  .mdl.wide { width: min(720px, 100%); }
+  .mdl-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 10px 20px; }
+  .mdl-h h2 { font-size: 17px; font-weight: 600; }
+  .mdl-b { padding: 4px 20px 18px; overflow: auto; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .mdl-f { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--rule); }
+  .mdl .h { display: block; }
+
+  /* Upload */
+  .up-drop { appearance: none; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px 16px; border: 1.5px dashed color-mix(in srgb, var(--accent) 35%, var(--rule)); border-radius: 10px; background: var(--surface); color: inherit; font: inherit; text-align: center; cursor: pointer; }
+  .up-drop:hover { border-color: var(--accent); }
+  .up-drop .qa-fws { justify-content: center; gap: 12px; margin-top: 6px; }
+  .fw-l { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .up-pick { display: flex; flex-direction: column; gap: 4px; padding: 10px; border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 8px 22px var(--shadow); }
+  .up-pf { appearance: none; display: flex; align-items: center; gap: 10px; padding: 8px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .up-pf:hover { background: var(--surface); }
+  .up-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; }
+  .cks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .ck-r { display: flex; gap: 10px; align-items: flex-start; }
+  .ck-i { flex: none; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; }
+  .ck-i .i { width: 13px; height: 13px; }
+  .ck-r.ok .ck-i { background: color-mix(in srgb, var(--up) 15%, var(--bg)); color: var(--up); }
+  .ck-r.bad .ck-i { background: color-mix(in srgb, var(--down) 15%, var(--bg)); color: var(--down); }
+  .ck-r b { font-weight: 500; }
+  .up-ok { padding: 12px 14px; border-radius: 8px; background: color-mix(in srgb, var(--up) 10%, var(--bg)); border: 1px solid color-mix(in srgb, var(--up) 35%, var(--rule)); }
+
+
+  /* Compare: Coming soon, as on the home page */
+  .cs { position: relative; overflow: hidden; border: 1px solid var(--rule); border-radius: 12px; background: var(--bg); padding: 20px; }
+  .cs-sk { display: flex; flex-direction: column; gap: 14px; -webkit-mask-image: linear-gradient(180deg, #000 20%, transparent 105%); mask-image: linear-gradient(180deg, #000 20%, transparent 105%); }
+  .cs-row { display: grid; grid-template-columns: 0.7fr 1.3fr 1fr 0.8fr 0.6fr; gap: 18px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .cs-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .cs-bar { display: block; height: 9px; border-radius: 5px; background: color-mix(in srgb, var(--ink) 9%, var(--bg)); }
+  .cs-bar.f { height: 7px; background: var(--surface); }
+  .cs-bar.up { background: color-mix(in srgb, var(--up) 26%, var(--bg)); }
+  .cs-bar.down { background: color-mix(in srgb, var(--down) 24%, var(--bg)); }
+  .cs-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .cs-tile { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--rule); border-radius: 8px; }
+  .cs-ch { display: block; width: 100%; height: 90px; }
+  .cs-eq { fill: none; stroke: color-mix(in srgb, var(--accent) 35%, var(--bg)); stroke-width: 3; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .cs-bh { fill: none; stroke: color-mix(in srgb, var(--ink) 14%, var(--bg)); stroke-width: 2; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
+  .cs-pipe { display: flex; align-items: center; }
+  .cs-node { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 12px 10px; border: 1px solid var(--rule); border-radius: 8px; }
+  .cs-wire { flex: 0 0 14px; height: 2px; background: var(--rule); }
+  .cs-pane { display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid var(--rule); border-radius: 8px; }
+  .cs-tag { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 9px; padding: 8px 16px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); font: 500 12.5px var(--mono); letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 8px 24px var(--shadow); }
+  .cs-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, var(--bg)); }
+
+  @media (max-width: 760px) {
+    .qa { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  }
+
+  /* Motion: what appears eases in, hovers ease. Off for people who ask for less motion. */
+  @keyframes fx-up { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes fx-fade { from { opacity: 0; } }
+  @keyframes fx-dlg { from { opacity: 0; transform: translateY(10px) scale(0.97); } }
+  @keyframes fx-pop { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+  .dd-main.in { animation: fx-up 0.2s ease-out; }
+  .mbg.in { animation: fx-fade 0.16s ease-out; }
+  .mbg.in .mdl { animation: fx-dlg 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .amenu.in { animation: fx-pop 0.14s ease-out; transform-origin: top right; }
+  .fp.in { animation: fx-pop 0.14s ease-out; transform-origin: top left; }
+  .btn, .qa-c, .dd-nav, .fp-t, .fp-o, .pg-l, .star, .link, .dd-sr, .dd-gs, .up-drop, .up-pf, .md-t, .tbl tr.rl td { transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s; }
+  .qa-c:hover, .dd-gs:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--shadow); }
+  .md-t:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--rule)); box-shadow: 0 4px 14px var(--shadow); }
+  .star:active { transform: scale(0.92); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+</style>
+<style>
+  /* Page basics (an artifact gets these from its host) */
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="frame" id="app"></div>
+
+<script>
+const LOGO = `<svg class="logo" viewBox="0 0 174 32" role="img" aria-label="CandleStack"><rect class="lg-a" width="32" height="32" rx="7"></rect><g class="lg-b"><rect x="10" y="12" width="2" height="14"></rect><rect x="8" y="16" width="6" height="8"></rect><rect x="20" y="6" width="2" height="18"></rect><rect x="18" y="10" width="6" height="10"></rect></g><path class="lg-c" d="M48.18 24.16Q46.05 24.16 44.42 23.18Q42.79 22.2 41.87 20.39Q40.95 18.57 40.95 16.02Q40.95 13.51 41.85 11.68Q42.75 9.84 44.38 8.84Q46.01 7.84 48.21 7.84Q51.2 7.84 52.85 9.32Q54.5 10.81 55 13.47L52.01 13.62Q51.73 12.08 50.78 11.2Q49.83 10.32 48.21 10.32Q46.23 10.32 45.06 11.86Q43.89 13.4 43.89 16.02Q43.89 18.66 45.07 20.17Q46.25 21.68 48.18 21.68Q49.92 21.68 50.88 20.72Q51.84 19.76 52.1 18.09L55.09 18.24Q54.63 20.99 52.88 22.58Q51.13 24.16 48.18 24.16ZM60.33 24.07Q58.48 24.07 57.36 23.24Q56.24 22.4 56.24 20.86Q56.24 19.34 57.18 18.49Q58.13 17.63 60.06 17.25L63.96 16.48Q63.96 13.98 61.69 13.98Q60.68 13.98 60.09 14.45Q59.49 14.92 59.29 15.8L56.43 15.67Q56.79 13.82 58.15 12.81Q59.51 11.8 61.69 11.8Q64.2 11.8 65.49 13.06Q66.77 14.33 66.77 16.68V20.95Q66.77 21.41 66.94 21.59Q67.1 21.76 67.43 21.76H67.81V23.81Q67.43 23.9 66.77 23.9Q65.83 23.9 65.17 23.5Q64.51 23.11 64.33 22.03V22.01Q63.89 22.93 62.83 23.5Q61.76 24.07 60.33 24.07ZM60.9 22.03Q62.31 22.03 63.13 21.21Q63.96 20.4 63.96 19.06V18.4L60.92 19.01Q59.98 19.21 59.57 19.6Q59.16 19.98 59.16 20.6Q59.16 22.03 60.9 22.03ZM69.13 23.81V12.06H71.68L71.75 14.06Q72.23 12.85 73.16 12.33Q74.1 11.8 75.27 11.8Q77.2 11.8 78.24 13.04Q79.27 14.28 79.27 16.26V23.81H76.45V17.17Q76.45 15.67 76 14.88Q75.55 14.09 74.41 14.09Q73.26 14.09 72.6 14.88Q71.94 15.67 71.94 17.17V23.81ZM85.98 24.07Q84.48 24.07 83.39 23.33Q82.31 22.58 81.71 21.2Q81.12 19.83 81.12 17.94Q81.12 16.07 81.72 14.68Q82.33 13.29 83.42 12.55Q84.51 11.8 85.98 11.8Q87.21 11.8 88.15 12.3Q89.08 12.81 89.57 13.73V8.19H92.38V23.81H89.7L89.63 22.07Q89.15 23.02 88.18 23.55Q87.21 24.07 85.98 24.07ZM86.84 21.79Q88.14 21.79 88.85 20.78Q89.57 19.78 89.57 17.94Q89.57 16.07 88.86 15.08Q88.16 14.09 86.84 14.09Q85.56 14.09 84.8 15.11Q84.04 16.13 84.04 17.94Q84.04 19.7 84.8 20.74Q85.56 21.79 86.84 21.79ZM97.73 23.81Q96.43 23.81 95.67 23.15Q94.91 22.49 94.91 21.04V8.19H97.73V20.75Q97.73 21.63 98.61 21.63H99.47V23.81ZM105.98 24.07Q104.22 24.07 102.92 23.31Q101.62 22.56 100.92 21.17Q100.21 19.78 100.21 17.94Q100.21 16.09 100.92 14.7Q101.62 13.32 102.91 12.56Q104.2 11.8 105.91 11.8Q107.58 11.8 108.84 12.55Q110.09 13.29 110.78 14.7Q111.48 16.11 111.48 18.09V18.73H103.14Q103.21 20.27 103.98 21.05Q104.75 21.83 106 21.83Q107.91 21.83 108.44 20.2L111.32 20.38Q110.84 22.09 109.42 23.08Q108 24.07 105.98 24.07ZM103.14 16.84H108.57Q108.46 15.41 107.75 14.71Q107.03 14.02 105.91 14.02Q104.77 14.02 104.04 14.75Q103.32 15.47 103.14 16.84ZM119.46 24.16Q117.53 24.16 116.12 23.48Q114.71 22.8 113.91 21.58Q113.11 20.36 112.97 18.73L115.88 18.55Q116.08 20.07 116.98 20.88Q117.88 21.7 119.51 21.7Q120.89 21.7 121.65 21.18Q122.41 20.66 122.41 19.67Q122.41 19.08 122.13 18.62Q121.84 18.16 121.03 17.76Q120.21 17.36 118.61 16.99Q116.67 16.55 115.5 15.99Q114.34 15.43 113.81 14.58Q113.28 13.73 113.28 12.46Q113.28 11.09 113.96 10.05Q114.65 9 115.9 8.42Q117.15 7.84 118.91 7.84Q120.78 7.84 122.09 8.51Q123.4 9.18 124.14 10.35Q124.88 11.51 125.05 13.03L122.17 13.16Q122.02 11.89 121.18 11.09Q120.34 10.3 118.87 10.3Q117.64 10.3 116.92 10.87Q116.21 11.45 116.21 12.35Q116.21 12.99 116.5 13.4Q116.8 13.82 117.57 14.13Q118.34 14.44 119.73 14.75Q121.82 15.21 123.05 15.88Q124.28 16.55 124.81 17.45Q125.34 18.35 125.34 19.52Q125.34 20.95 124.6 21.99Q123.86 23.04 122.55 23.6Q121.25 24.16 119.46 24.16ZM132.2 23.81Q130.44 23.81 129.62 23.01Q128.79 22.2 128.79 20.44V14.24H126.94V12.06H128.79V9.31H131.61V12.06H134.71V14.24H131.61V20.18Q131.61 21.02 131.97 21.32Q132.33 21.63 133.06 21.63H134.71V23.81ZM139.75 24.07Q137.9 24.07 136.78 23.24Q135.66 22.4 135.66 20.86Q135.66 19.34 136.6 18.49Q137.55 17.63 139.48 17.25L143.38 16.48Q143.38 13.98 141.11 13.98Q140.1 13.98 139.51 14.45Q138.91 14.92 138.71 15.8L135.85 15.67Q136.21 13.82 137.57 12.81Q138.93 11.8 141.11 11.8Q143.62 11.8 144.91 13.06Q146.19 14.33 146.19 16.68V20.95Q146.19 21.41 146.36 21.59Q146.52 21.76 146.85 21.76H147.23V23.81Q146.85 23.9 146.19 23.9Q145.25 23.9 144.59 23.5Q143.93 23.11 143.75 22.03V22.01Q143.31 22.93 142.24 23.5Q141.18 24.07 139.75 24.07ZM140.32 22.03Q141.73 22.03 142.55 21.21Q143.38 20.4 143.38 19.06V18.4L140.34 19.01Q139.4 19.21 138.99 19.6Q138.58 19.98 138.58 20.6Q138.58 22.03 140.32 22.03ZM153.65 24.07Q151.89 24.07 150.59 23.31Q149.3 22.56 148.58 21.17Q147.87 19.78 147.87 17.94Q147.87 16.09 148.58 14.7Q149.3 13.32 150.59 12.56Q151.89 11.8 153.65 11.8Q155.9 11.8 157.38 12.96Q158.87 14.13 159.13 16.22L156.23 16.37Q156.05 15.25 155.36 14.67Q154.66 14.09 153.65 14.09Q152.29 14.09 151.54 15.1Q150.79 16.11 150.79 17.94Q150.79 19.76 151.54 20.77Q152.29 21.79 153.65 21.79Q154.69 21.79 155.38 21.19Q156.07 20.6 156.23 19.34L159.13 19.48Q158.89 21.59 157.4 22.83Q155.92 24.07 153.65 24.07ZM160.76 23.81V8.19H163.57V17.36L168.39 12.06H171.87L167.27 16.95L172.02 23.81H168.85L165.42 18.62L163.57 20.58V23.81Z"></path></svg>`;
+// ---------- example data ----------
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r) { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+const USER = { name: 'Arsen Labovich', first: 'Arsen', ini: 'AL', email: 'arsen@example.com' };
+const REP = { renko: 'Renko', kagi: 'Kagi', windows: 'Time windows' };
+// Per instrument, with the example setup (Renko, blesk-novol-8.keras, long only), as in the builder artifact.
+// r: return %, buy & hold %, Sharpe, max drawdown %, trades, winning trades
+const INST = {
+  AAPL: { name: 'Apple Inc.', r: [38.4, 61.2, 1.12, -14.8, 214, 116] },
+  MSFT: { name: 'Microsoft Corporation', r: [22.7, 52.4, 0.81, -17.3, 198, 103] },
+  NVDA: { name: 'NVIDIA Corporation', r: [96.5, 142.3, 1.34, -24.1, 241, 134] },
+  SPY: { name: 'SPDR S&amp;P 500 ETF Trust', r: [9.8, 38.0, 0.52, -11.2, 176, 89] },
+  TSLA: { name: 'Tesla, Inc.', r: [21.4, 15.7, 0.64, -31.5, 227, 111] },
+  AMZN: { name: 'Amazon.com, Inc.', r: [17.9, 34.6, 0.71, -19.4, 205, 104] },
+  META: { name: 'Meta Platforms, Inc.', r: [64.2, 127.8, 1.08, -28.7, 219, 117] },
+  GOOGL: { name: 'Alphabet Inc.', r: [27.3, 89.5, 0.86, -21.6, 201, 105] },
+};
+const FIVE = ['AAPL', 'MSFT', 'NVDA', 'SPY', 'TSLA'];
+const B8 = 'blesk-novol-8.keras', B9 = 'blesk-novol-9.keras', TSM = 'my-tsmixer.keras', STM = 'stockmixer.onnx';
+// Runs, newest first. st: running, done or failed. ret, bh, dd and win in %, dur in seconds.
+const run = (id, st, inst, rep, model, day, time, o = {}) => ({ id, st, inst, rep, model, day, time, tf: '30m', from: 2021, to: 2024, dir: 'long', t: 0.05, sl: '7 %', star: false, ...o });
+const RUNS = [
+  run(15, 'done', [...FIVE, 'AMZN', 'META', 'GOOGL'], 'windows', TSM, 'Today', '16:05', { dur: 162, ret: 24.6, bh: 68.2, sharpe: 0.79, dd: -19.7, trades: 1712, win: 51.2 }),
+  run(14, 'done', ['NVDA'], 'renko', B8, 'Today', '15:51', { dur: 22, ret: 96.5, bh: 142.3, sharpe: 1.34, dd: -24.1, trades: 241, win: 55.6, star: true }),
+  run(13, 'failed', ['TSLA'], 'kagi', B8, 'Today', '15:40', { dur: 3, err: 'blesk-novol-8.keras reads Renko bricks, not a Kagi line. Pick a model that reads Kagi or switch back to Renko.' }),
+  run(12, 'done', FIVE, 'renko', B8, 'Today', '14:22', { dur: 90, ret: 37.8, bh: 61.9, sharpe: 0.99, dd: -15.8, trades: 1056, win: 52.4, star: true }),
+  run(11, 'done', ['AAPL'], 'renko', B8, 'Today', '13:58', { dur: 21, ret: 38.4, bh: 61.2, sharpe: 1.12, dd: -14.8, trades: 214, win: 54.2, star: true }),
+  run(10, 'done', ['AAPL'], 'renko', B9, 'Yesterday', '18:10', { dur: 20, ret: 31.0, bh: 61.2, sharpe: 0.97, dd: -16.2, trades: 188, win: 52.7 }),
+  run(9, 'done', ['AAPL'], 'windows', TSM, 'Yesterday', '17:31', { dur: 34, ret: 12.6, bh: 61.2, sharpe: 0.48, dd: -19.9, trades: 302, win: 50.3 }),
+  run(8, 'done', ['SPY'], 'renko', B8, 'Yesterday', '16:02', { dir: 'both', dur: 19, ret: -4.2, bh: 38.0, sharpe: -0.18, dd: -22.4, trades: 341, win: 47.8 }),
+  run(7, 'done', ['MSFT', 'GOOGL'], 'renko', B8, '12 Oct', '19:44', { dur: 41, ret: 25.0, bh: 71.0, sharpe: 0.84, dd: -18.0, trades: 399, win: 51.6, star: true }),
+  run(6, 'failed', ['AAPL'], 'windows', STM, '12 Oct', '18:20', { dur: 2, err: 'stockmixer.onnx expects 30 candles per sample. The windows give 25. Set the window to 30 or pick another model.' }),
+  run(5, 'done', ['TSLA'], 'renko', B8, '12 Oct', '17:05', { dur: 22, ret: 21.4, bh: 15.7, sharpe: 0.64, dd: -31.5, trades: 227, win: 48.9 }),
+  run(4, 'done', ['AAPL'], 'renko', B8, '11 Oct', '20:12', { t: 0.10, dur: 20, ret: 18.3, bh: 61.2, sharpe: 0.88, dd: -9.7, trades: 72, win: 58.3 }),
+  run(3, 'done', ['META'], 'renko', B8, '11 Oct', '19:30', { dur: 21, ret: 64.2, bh: 127.8, sharpe: 1.08, dd: -28.7, trades: 219, win: 53.4, star: true }),
+  run(2, 'done', ['AAPL'], 'renko', B9, '10 Oct', '21:02', { dur: 20, ret: 29.6, bh: 61.2, sharpe: 0.93, dd: -17.0, trades: 176, win: 52.3 }),
+  run(1, 'done', ['AAPL'], 'renko', B8, '10 Oct', '20:40', { dur: 21, ret: 38.4, bh: 61.2, sharpe: 1.12, dd: -14.8, trades: 214, win: 54.2, ex: true }),
+];
+// A new account starts with the example run only.
+const EXAMPLE_NEW = { ...RUNS[RUNS.length - 1], day: 'Today', time: '16:02' };
+const MODELS = [
+  { id: 'b8', name: B8, fw: 'Keras', src: 'built', reads: 'renko', shape: '25 × 23 → 1', runs: 10, size: '3.1 MB', star: true },
+  { id: 'b9', name: B9, fw: 'Keras', src: 'built', reads: 'renko', shape: '25 × 23 → 1', runs: 2, size: '3.1 MB' },
+  { id: 'tsm', name: TSM, fw: 'Keras', src: 'up', reads: 'windows', shape: '25 × 23 → 1', runs: 2, size: '14.2 MB', added: '13 Oct', star: true },
+  { id: 'stm', name: STM, fw: 'ONNX', src: 'up', reads: 'windows', shape: '30 × 23 → 1', runs: 1, size: '8.7 MB', added: '12 Oct', warn: 'Needs 30-candle windows', star: true },
+  { id: 'pst', name: 'patchtst.pt', fw: 'PyTorch', src: 'up', reads: 'windows', shape: '30 × 23 → 1', runs: 0, size: '5.4 MB', added: '9 Oct', star: true },
+  { id: 'gbm', name: 'gbm-renko.joblib', fw: 'scikit-learn', src: 'up', reads: 'renko', shape: '25 × 23 → 1', runs: 0, size: '1.2 MB', added: '8 Oct', star: true },
+];
+// Starting points for a new backtest
+const TEMPLATES = [
+  { n: 'Renko and BLESK', d: 'The example setup. Renko bricks, blesk-novol-8.keras, long only.', cfg: { inst: ['AAPL'], rep: 'renko', model: B8, dir: 'long', t: 0.05, sl: '7 %' } },
+  { n: 'Your model on windows', d: '25-candle windows with 23 indicators, for a model you upload.', cfg: { inst: ['AAPL'], rep: 'windows', model: null, dir: 'long', t: 0.05, sl: '7 %' } },
+  { n: 'Five stocks at once', d: 'AAPL, MSFT, NVDA, SPY and TSLA with the example setup.', cfg: { inst: FIVE, rep: 'renko', model: B8, dir: 'long', t: 0.05, sl: '7 %' } },
+];
+const USAGE = { today: 5, modelsMB: 29.5, capMB: 500 };
+const DATA_NOTE = 'Market data delayed 15 min';
+const FORMATS = ['Keras', 'TensorFlow', 'PyTorch', 'ONNX', 'scikit-learn'];
+
+// ---------- state ----------
+const S = {
+  v: 'D', pop: null, empty: false, page: 'dash', from: 'dash', run: null, newSrc: null, menu: false, set: 'profile', delc: false,
+  setv: { tf: '30m', dir: 'long', sl: 7, the: 0.05, bench: 'bh', tz: 'ny', df: 'dmy', tf2: '24', calm: false, start: 'dash', theme: 'system' },
+};
+const DIRS = {}, DFN = {}, ACT = {}, LIVE = {}, INPUT = {};
+
+// ---------- helpers ----------
+const runs = () => S.empty ? [EXAMPLE_NEW] : RUNS;
+const doneRuns = () => runs().filter(r => r.st === 'done');
+const ownRuns = () => runs().filter(r => !r.ex);
+const models = () => S.empty ? MODELS.filter(m => m.src === 'built' || m.fresh) : MODELS;
+const mStar = m => !!(S.empty ? m.starNew : m.star);
+const runById = id => runs().find(r => r.id === id) || RUNS.find(r => r.id === id);
+const best = k => doneRuns().reduce((a, r) => (!a || r[k] > a[k] ? r : a), null);
+const fmtN = v => v.toLocaleString('en-US');
+const pct = v => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} %`;
+const num = v => `${v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
+const dur = s => s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${s % 60} s`;
+const when = r => `${r.day} ${r.time}`;
+const esc = s => String(s).replace(/&(?!amp;)/g, '&amp;').replace(/</g, '&lt;');
+function instShort(a) { return a.length <= 3 ? a.join(', ') : `${a.slice(0, 2).join(', ')} +${a.length - 2}`; }
+function instList(a) { if (a.length === 1) return a[0]; if (a.length <= 5) return `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`; return `${a.slice(0, 3).join(', ')} and ${a.length - 3} more`; }
+function ichips(a, max = 3) { const s = a.slice(0, a.length > max ? max - 1 : max); return `<span class="ichips">${s.map(t => `<span class="chip">${t}</span>`).join('')}${a.length > s.length ? `<span class="chip">+${a.length - s.length}</span>` : ''}</span>`; }
+const dirText = d => d === 'long' ? 'long only' : 'long and short';
+const repDetail = r => r === 'renko' ? '0.6 × ATR(14)' : r === 'kagi' ? 'turns at 0.6 %' : '25 candles · 23 indicators';
+// Run name: what it ran on and with what
+const runName = r => `${instShort(r.inst)} · ${REP[r.rep]} · ${r.model}`;
+const runSetup = r => `${REP[r.rep]} · ${r.model} · ${dirText(r.dir)} at ${r.t.toFixed(2)}`;
+function stBadge(r) {
+  if (r.st === 'running') return `<span class="badge run">Running ${r.prog} %</span>`;
+  if (r.st === 'failed') return '<span class="badge bad">Failed</span>';
+  return r.ex ? '<span class="badge">Example</span>' : '<span class="badge ok">Finished</span>';
+}
+const progBar = p => `<span class="prog"><i style="width:${p}%"></i></span>`;
+// What changed against the previous run (the next older one)
+function changes(r) {
+  const list = runs(), i = list.indexOf(r), p = list[i + 1];
+  if (!p) return [];
+  const out = [];
+  if (r.inst.join() !== p.inst.join()) out.push(`${instShort(p.inst)} → ${instShort(r.inst)}`);
+  if (r.rep !== p.rep) out.push(`${REP[p.rep]} → ${REP[r.rep]}`);
+  if (r.model !== p.model) out.push(`${p.model} → ${r.model}`);
+  if (r.dir !== p.dir) out.push(`${dirText(p.dir)} → ${dirText(r.dir)}`);
+  if (r.t !== p.t) out.push(`threshold ${p.t.toFixed(2)} → ${r.t.toFixed(2)}`);
+  return out;
+}
+
+// ---------- charts ----------
+function niceTicks(lo, hi, n) { const raw = (hi - lo) / n; const p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; const st = (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p; const out = []; for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) out.push(+v.toFixed(6)); return out; }
+const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
+const EQ = {};
+// Example equity of a finished run: strategy (s) and buy & hold (b), 120 steps over 2021 to 2024
+function eqRun(r) {
+  if (r.st !== 'done') return null;
+  if (EQ[r.id]) return EQ[r.id];
+  const rnd = mulberry(r.id * 7919 + 13), n = 120, v = Math.min(1.4, 0.6 + Math.abs(r.dd) / 25);
+  const mk = (tg, vol) => { const w = [0]; for (let i = 1; i <= n; i++) w.push(w[i - 1] + gauss(rnd) * vol); return w.map((x, i) => 1 + tg * i / n + x - w[n] * i / n); };
+  return EQ[r.id] = { s: mk(r.ret / 100, 0.018 * v), b: mk(r.bh / 100, 0.03 * v), n };
+}
+function equity(e, h = 220) {
+  const w = 800, pl = 8, pr = 52, pt = 26, pb = 24, iw = w - pl - pr, ih = h - pt - pb;
+  const all = [...e.s, ...e.b]; let lo = Math.min(...all), hi = Math.max(...all); const pd = (hi - lo) * 0.08; lo -= pd; hi += pd;
+  const x = i => pl + i / e.n * iw, y = v => pt + (hi - v) / (hi - lo) * ih; let g = '';
+  niceTicks(lo - 1, hi - 1, 4).forEach(t => { const yy = y(1 + t); g += `<line class="gl" x1="${pl}" x2="${pl + iw}" y1="${yy}" y2="${yy}"/><text class="ax" x="${w - pr + 6}" y="${yy + 4}">${sgn(Math.round(t * 100))}%</text>`; });
+  ['2021', '2022', '2023', '2024'].forEach((l, k) => { g += `<text class="ax" x="${x(k * 30) + 2}" y="${h - 6}">${l}</text>`; });
+  const line = a => a.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('');
+  g += `<path class="eqa" d="${line(e.s)}L${x(e.n)} ${y(1)}L${x(0)} ${y(1)}Z"/><path class="bh" d="${line(e.b)}"/><path class="eq" d="${line(e.s)}"/><circle class="eqd" cx="${x(e.n)}" cy="${y(e.s[e.n])}" r="3.5"/>`;
+  g += `<text class="lgd-s" x="${pl}" y="14">— Strategy ${pct((e.s[e.n] - 1) * 100)}</text><text class="lgd-b" x="${pl + 170}" y="14">- - Buy &amp; hold ${pct((e.b[e.n] - 1) * 100)}</text>`;
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Equity curve against buy and hold">${g}</svg>`;
+}
+// Small equity line: strategy solid, buy & hold dashed. w and h in px.
+function spark(e, w = 96, h = 26) {
+  const all = [...e.s, ...e.b], lo = Math.min(...all), hi = Math.max(...all);
+  const x = i => i / e.n * w, y = v => 2 + (hi - v) / (hi - lo) * (h - 4), line = a => a.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('');
+  return `<svg class="spk" viewBox="0 0 ${w} ${h}" style="width:${w}px;height:${h}px" aria-hidden="true"><path class="bh" d="${line(e.b)}"/><path class="eq" d="${line(e.s)}"/></svg>`;
+}
+function tile(k, v, cls, s) { return `<div class="tm"><div class="k">${k}</div><div class="v ${cls || ''}">${v}</div><div class="s">${s || '&nbsp;'}</div></div>`; }
+function seg(items, on, act, k) { return `<div class="seg" role="group">${items.map(it => { const [v, l] = Array.isArray(it) ? it : [it, it]; return `<button type="button" class="${v === on ? 'on' : ''}" data-act="${act}" ${k ? `data-k="${k}"` : ''} data-val="${v}">${l}</button>`; }).join('')}</div>`; }
+
+// ---------- shared lists ----------
+// The standard run table. opts.rows: runs to show, opts.sel: a Set of selected ids with opts.selAct (checkboxes), opts.cols: drop columns by name.
+function runsTable(opts = {}) {
+  const rows = opts.rows || runs(), sel = opts.sel, drop = opts.drop || [];
+  const col = k => !drop.includes(k);
+  const head = `<tr>${sel ? '<th></th>' : ''}<th>Backtest</th><th>Instruments</th>${col('setup') ? '<th>Setup</th>' : ''}<th class="num">Return</th>${col('bh') ? '<th class="num">Buy &amp; hold</th>' : ''}<th class="num">Sharpe</th>${col('dd') ? '<th class="num">Max drawdown</th>' : ''}${col('trades') ? '<th class="num">Trades</th>' : ''}${col('took') ? '<th class="num">Took</th>' : ''}<th>When</th></tr>`;
+  const body = rows.map(r => {
+    const d = r.st === 'done', dash = '<span class="muted">–</span>';
+    const ret = d ? `<b class="${r.ret >= 0 ? 'up' : 'down'}">${pct(r.ret)}</b>` : r.st === 'running' ? `<span style="display:inline-flex;gap:8px;align-items:center;justify-content:flex-end">${progBar(r.prog)}<span class="mono">${r.prog} %</span></span>` : '<span class="badge bad">Failed</span>';
+    return `<tr class="rl" data-act="openRun" data-val="${r.id}">${sel ? `<td><button type="button" class="ck ${sel.has(r.id) ? 'on' : ''}" data-act="${opts.selAct}" data-val="${r.id}" aria-label="Select backtest ${r.id}" aria-pressed="${sel.has(r.id)}"></button></td>` : ''}
+      <td><span style="display:inline-flex;gap:6px;align-items:center"><button type="button" class="star ${r.star ? 'on' : ''}" title="${r.star ? 'Remove star' : 'Star'}" data-act="star" data-val="${r.id}" aria-label="Star backtest ${r.id}">${r.star ? '★' : '☆'}</button><span class="rid">#${r.id}</span>${r.ex ? '<span class="badge">Example</span>' : ''}</span></td>
+      <td>${ichips(r.inst)}</td>${col('setup') ? `<td><span>${REP[r.rep]}</span><span class="sub">${r.model}</span></td>` : ''}
+      <td class="num">${ret}</td>${col('bh') ? `<td class="num">${d ? pct(r.bh) : dash}</td>` : ''}<td class="num">${d ? num(r.sharpe) : dash}</td>${col('dd') ? `<td class="num">${d ? pct(r.dd) : dash}</td>` : ''}${col('trades') ? `<td class="num">${d ? fmtN(r.trades) : dash}</td>` : ''}${col('took') ? `<td class="num">${r.dur ? dur(r.dur) : dash}</td>` : ''}<td class="muted">${when(r)}</td></tr>`;
+  }).join('');
+  return `<div class="tblwrap"><table class="tbl">${head}${body}</table></div>`;
+}
+function uploadBox() {
+  return `<div class="drop"><div><b>Upload a trained model</b><p class="hint">We check that it is a real model with trained weights.</p><div class="chips" style="margin-top:8px">${FORMATS.map(f => `<span class="chip">${f}</span>`).join('')}</div></div><button type="button" class="btn" data-act="upOpen">Upload</button></div>`;
+}
+function modelsList(opts = {}) {
+  const list = models();
+  const rows = list.map(m => `<div class="mrow"><div><span style="display:inline-flex;gap:6px;align-items:center"><button type="button" class="star ${mStar(m) ? 'on' : ''}" title="${mStar(m) ? 'Remove star' : 'Star'}" data-act="starM" data-val="${m.id}" aria-label="Star model ${m.name}">${mStar(m) ? '★' : '☆'}</button><span class="mn">${m.name}</span></span><span class="bd"><span class="badge">${m.fw}</span><span class="badge">${m.src === 'built' ? 'Built in' : 'Uploaded'}</span>${m.warn ? `<span class="badge warn">${m.warn}</span>` : m.src === 'up' ? '<span class="badge ok">Weights checked</span>' : ''}</span></div>
+    <span class="mm">Reads ${REP[m.reads]} · ${m.shape || 'shape not in the file'}</span><span class="ru">${S.empty ? 'not used yet' : `${m.runs} ${m.runs === 1 ? 'backtest' : 'backtests'}`} · ${m.size}</span></div>`).join('');
+  return `<div class="mlist">${rows}${opts.upload === false ? '' : uploadBox()}</div>`;
+}
+// The five blocks of a setup, as in builder direction B. cfg: inst, rep, model, dir, t, sl. set: which blocks are set.
+function pipeNodes(cfg, set = [true, true, true, true, true]) {
+  const v = [
+    ['Input', 'Market data', instShort(cfg.inst), '30m · 2021–2024'],
+    ['Layer 1', 'Representation', REP[cfg.rep], repDetail(cfg.rep)],
+    ['Layer 2', 'Model', cfg.model || 'Not set', cfg.model ? (MODELS.find(m => m.name === cfg.model) || {}).shape || '' : ''],
+    ['Layer 3', 'Decision', cfg.dir === 'long' ? 'Long only' : 'Long and short', `at ${cfg.t.toFixed(2)} · stop ${cfg.sl}`],
+    ['Output', 'Backtest', 'Test period', 'against buy &amp; hold'],
+  ];
+  return `<div class="pl-nodes">${v.map((n, j) => `${j ? '<span class="wire"></span>' : ''}<div class="node static ${j > 0 && j < 4 ? 'layer' : ''} ${set[j] ? '' : 'unset'}"><span class="eyebrow">${n[0]}</span><b>${n[1]}</b><span class="nv">${set[j] ? n[2] : 'Not set'}</span><span class="no">${set[j] ? n[3] : '&nbsp;'}</span></div>`).join('')}</div>`;
+}
+
+// ---------- header, footer, account menu ----------
+const SUN = `<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+const MOON = `<svg class="i" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`;
+const PLUS = `<svg class="i nb-i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
+function isDark() { const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+const NAV = [['dash', 'Dashboard'], ['runs', 'Backtests'], ['models', 'Models'], ['inst', 'Instruments'], ['api', 'API']];
+function section() { return S.page === 'run' ? (S.from === 'dash' ? 'dash' : S.from) : S.page; }
+function header() {
+  const keys = DIRS[S.v] && DIRS[S.v].hnav || NAV.map(n => n[0]);
+  const nav = NAV.filter(n => keys.includes(n[0])).map(([k, l]) => ['inst', 'api'].includes(k) ? `<button type="button">${l}</button>` : `<button type="button" class="${section() === k ? 'on' : ''}" data-act="go" data-val="${k}">${l}</button>`).join('');
+  const th = `<button type="button" class="btn ghost icon" data-act="theme" aria-label="Switch theme">${isDark() ? SUN : MOON}</button>`;
+  return `<header class="ahdr"><div class="ahdr-in"><button type="button" class="home-link av-btn" data-act="go" data-val="dash" aria-label="CandleStack dashboard">${LOGO}</button>${nav ? `<nav class="anav" aria-label="Main">${nav}</nav>` : ''}<div class="sp"></div>
+    <div class="r"><button type="button" class="btn pri nb" data-act="go" data-val="new" aria-label="New backtest">${PLUS}<span class="nb-t">New backtest</span></button>${th}<button type="button" class="av-btn" data-act="menu" aria-expanded="${S.menu}" aria-label="Account"><span class="avatar">${USER.ini}</span></button>${S.menu ? acctMenu() : ''}</div></div></header>`;
+}
+// Account menu icons: settings as in the sidebar, home, code brackets for the API, a door for sign out
+const MI = {
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  home: '<path d="M3 10.5L12 3l9 7.5"/><path d="M5 9v12h14V9"/><path d="M10 21v-6h4v6"/>',
+  api: '<path d="M8 6l-6 6 6 6"/><path d="M16 6l6 6-6 6"/>',
+  out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+};
+const mi = (k, l, act = 'data-act="noop"', cls = '') => `<button type="button" class="${cls}" ${act || 'data-act="noop"'}><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${MI[k]}</svg>${l}</button>`;
+function acctMenu() {
+  return `<div class="amenu ${S.anim && S.anim.menu ? 'in' : ''}" role="menu"><div class="who"><b>${USER.name}</b><span>${USER.email}</span></div>
+    ${mi('settings', 'Settings', 'data-act="setTab" data-val="profile"')}${mi('home', 'Home page')}${mi('api', 'API docs')}<hr>${mi('out', 'Sign out', '', 'out')}</div>`;
+}
+// Production's links, opening in a new tab. Logo.dev stays plain text: mocks never link it.
+const FLINKS = [['API docs', 'https://app.candlestack.tech/api/v1/docs'], ['Status', 'https://ops.candlestack.tech'], ['candlestack.tech', 'https://candlestack.tech']];
+function footer() { return `<footer class="afoot"><div><span>CandleStack</span>${FLINKS.map(([n, h]) => `<a href="${h}" target="_blank" rel="noopener">${n}</a>`).join('')}<span class="cred"><span>Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView Lightweight Charts™</a></span><span>Logos provided by <u>Logo.dev</u></span></span></div></footer>`; }
+
+// ---------- shared pages ----------
+function backBtn() { const l = { dash: 'Dashboard', runs: 'Backtests', models: 'Models' }[S.from] || 'Dashboard'; return `<button type="button" class="back" data-act="go" data-val="${S.from}">← ${l}</button>`; }
+function pageRun() {
+  const r = runById(S.run);
+  const acts = `<div class="chips"><button type="button" class="btn sm pri" data-act="newFrom" data-val="${r.id}">Open in builder</button>${r.st === 'running' ? '<button type="button" class="btn sm">Cancel</button>' : `<button type="button" class="btn sm">Run again</button>${r.st === 'done' ? '<button type="button" class="btn sm" data-act="cmpOpen">Compare</button><button type="button" class="btn sm">Trades CSV</button>' : ''}`}</div>`;
+  let body = '';
+  if (r.st === 'running') body = `<section class="card pane stack"><div class="run-h"><b>${r.stage}</b><span class="mono muted" style="font-size:12px">${r.eta}</span></div>${progBar(r.prog)}<p class="hint">Results show here when the backtest ends. You can close the page. The backtest keeps going.</p></section>`;
+  else if (r.st === 'failed') body = `<div class="err"><span class="dot"></span><span>${r.err}</span></div>`;
+  else {
+    const n = r.inst.length;
+    body = `<div class="tiles">${tile('Total return', pct(r.ret), r.ret >= 0 ? 'up' : 'down', `buy & hold ${pct(r.bh)}`)}${tile('Sharpe', num(r.sharpe), '', 'annualized')}${tile('Max drawdown', pct(r.dd), 'down', '')}${tile('Win rate', `${r.win.toFixed(1)} %`, '', `of ${fmtN(r.trades)} trades`)}${tile('Trades', fmtN(r.trades), '', n > 1 ? `${n} instruments` : '')}${tile('Took', dur(r.dur), '', '')}</div>
+    <div class="card" style="padding:14px"><div class="chart">${equity(eqRun(r))}</div></div>${n > 1 ? `<p class="hint">All ${n} together, ${100 / n} % of the money in each.</p>${instTable(r)}` : ''}`;
+  }
+  return `${backBtn()}<div class="ttl"><div><h1 style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">Backtest #${r.id} ${stBadge(r)}</h1><p>${instList(r.inst)} · ${when(r)}${r.dur ? ` · took ${dur(r.dur)}` : ''}</p></div>${acts}</div>
+  <div class="stack">${pipeNodes(r)}${body}</div>`;
+}
+function instTable(r) {
+  const rows = r.inst.filter(t => INST[t]).map(t => { const v = INST[t].r; return `<tr><td><b class="mono">${t}</b> <span class="muted">${INST[t].name}</span></td><td class="num ${v[0] >= 0 ? 'up' : 'down'}">${pct(v[0])}</td><td class="num">${pct(v[1])}</td><td class="num">${num(v[2])}</td><td class="num">${pct(v[3])}</td><td class="num">${v[4]}</td></tr>`; }).join('');
+  return `<div class="card tblwrap"><table class="tbl"><tr><th>Instrument</th><th class="num">Return</th><th class="num">Buy &amp; hold</th><th class="num">Sharpe</th><th class="num">Max drawdown</th><th class="num">Trades</th></tr>${rows}</table></div>`;
+}
+function newCfg() {
+  const s = S.newSrc, dv = { inst: ['AAPL'], rep: 'renko', model: null, dir: S.setv.dir, t: 0.05, sl: `${S.setv.sl} %` };
+  if (!s) return { cfg: dv, set: [true, true, false, true, true], label: 'Starts with your backtest defaults' };
+  if (s.k === 'model') return { cfg: { inst: ['AAPL'], rep: 'windows', model: s.name, dir: S.setv.dir, t: 0.05, sl: `${S.setv.sl} %` }, set: [true, true, true, true, true], label: `With ${s.name}` };
+  if (s.k === 'run') { const r = runById(s.id); return { cfg: r, set: [true, true, true, true, true], label: `A copy of backtest #${r.id}` }; }
+  const t = TEMPLATES[s.i]; return { cfg: t.cfg, set: [true, true, !!t.cfg.model, true, true], label: `Starting point · ${t.n}` };
+}
+function pageNew() {
+  const { cfg, set, label } = newCfg();
+  return `${backBtn()}<div class="ttl"><div><h1>New backtest</h1><p>${label}</p></div><div class="chips"><button type="button" class="btn sm pri" ${set.every(Boolean) ? '' : 'disabled'}>Run</button></div></div>
+  <div class="stack">${pipeNodes(cfg, set)}</div>`;
+}
+function pageRuns() { const n = runs().length; return `<div class="ttl"><div><h1>Backtests</h1><p>${n} ${n === 1 ? 'backtest' : 'backtests'} · newest first</p></div></div><div class="card">${runsTable()}</div>`; }
+function pageModels() { return `<div class="ttl"><div><h1>Models</h1><p>Built-in models and the ones you uploaded</p></div></div>${modelsList()}`; }
+const SET_TABS = [['profile', 'Profile'], ['defaults', 'Backtest defaults'], ['look', 'Appearance'], ['data', 'Data and storage'], ['apps', 'Connected apps'], ['acct', 'Account']];
+function settingsPanel() {
+  const fld = (l, c) => `<span class="lab">${l}</span><div>${c}</div>`;
+  const inp = (v, lab) => `<input class="inp" value="${v}" aria-label="${lab}">`;
+  const p = {
+    profile: () => `<div><h2>Profile</h2><p class="lead">How you show up in CandleStack.</p></div><div class="fg">${fld('Name', inp(USER.name, 'Name'))}${fld('Email', inp(USER.email, 'Email'))}${fld('Password', '<button type="button" class="btn sm">Change password</button>')}</div><div class="set-f"><button type="button" class="btn pri">Save changes</button></div>`,
+    defaults: () => `<div><h2>Backtest defaults</h2><p class="lead">New backtests start with these. Each backtest can change them.</p></div><div class="fg">${fld('Timeframe', seg(['5m', '30m', '1h', '1d'], S.setv.tf, 'setv', 'tf'))}${fld('Test period', `<div class="two">${inp('2021-01-04', 'From')}<span class="muted">to</span>${inp('2024-12-31', 'To')}</div>`)}${fld('Direction', seg([['long', 'Long only'], ['both', 'Long and short']], S.setv.dir, 'setv', 'dir'))}${fld('Threshold', inp('0.05', 'Threshold'))}${fld('Stop loss', seg(['5 %', '7 %', '10 %'], S.setv.sl, 'setv', 'sl'))}${fld('Fees', inp('0.1 % per side', 'Fees'))}${fld('Slippage', inp('0.02 %', 'Slippage'))}${fld('Benchmark', '<span class="mono">Buy &amp; hold</span>')}</div><div class="set-f"><button type="button" class="btn pri">Save defaults</button></div>`,
+    look: () => `<div><h2>Appearance</h2><p class="lead">Saved to your account, so every device looks the same.</p></div><div class="fg">${fld('Theme', seg([['system', 'System'], ['light', 'Light'], ['dark', 'Dark']], S.setv.theme, 'theme3'))}${fld('After sign-in', seg([['dash', 'Dashboard'], ['new', 'New backtest']], S.setv.start, 'setv', 'start'))}</div>`,
+    data: () => `<div><h2>Data and storage</h2><p class="lead">Where the candles come from and what your account keeps.</p></div><div class="fg">${fld('Market data', '<span>Alpaca, SIP feed</span><span class="hint" style="display:block">Delayed 15 min</span>')}${fld('Stored backtests', `<span class="mono">${runs().length}</span><span class="hint" style="display:block">Kept until you delete them</span>`)}${fld('Uploaded models', `<span class="mono">${S.empty ? '0 MB' : `${USAGE.modelsMB} MB`} of ${USAGE.capMB} MB</span><span class="meter" style="margin-top:6px"><i style="width:${S.empty ? 0 : USAGE.modelsMB / USAGE.capMB * 100}%"></i></span>`)}${fld('Export', '<button type="button" class="btn sm">Download backtests as CSV</button>')}</div>`,
+    apps: () => `<div><h2>Connected apps</h2><p class="lead">Use CandleStack from other tools.</p></div><div class="soon"><div><b>Claude and ChatGPT</b><p>Ask about your backtests and start new ones from a chat. You sign in with your CandleStack account.</p></div><span class="badge soon">Coming soon</span></div>`,
+    acct: () => `<div><h2>Account</h2><p class="lead">Signed in as ${USER.email}</p></div><div class="fg">${fld('Sessions', '<button type="button" class="btn sm">Sign out everywhere</button>')}</div><div class="danger-z"><div><b>Delete account</b><p>Deletes your backtests and uploaded models. This cannot be undone.</p></div>${S.delc ? `<div class="chips"><button type="button" class="btn sm" data-act="delc">Cancel</button><button type="button" class="btn sm danger pri">Delete ${runs().length} backtests and the account</button></div>` : '<button type="button" class="btn sm danger" data-act="delc">Delete account</button>'}</div>`,
+  };
+  return `<div class="set"><nav class="set-nav" aria-label="Settings">${SET_TABS.map(([k, l]) => `<button type="button" class="${S.set === k ? 'on' : ''}" data-act="setTab" data-val="${k}">${l}</button>`).join('')}</nav><section class="card set-p">${p[S.set]()}</section></div>`;
+}
+function pageSettings() { return `<div class="ttl"><div><h1>Settings</h1><p>Your account and how new backtests start</p></div></div>${settingsPanel()}`; }
+// Overlays: a function per modal, S.modal names the open one
+const MODALS = {};
+const PAGES = { run: pageRun, new: pageNew, runs: pageRuns, models: pageModels, settings: pageSettings };
+
+// ---------- page ----------
+function render() {
+  const A = S.anim = { page: S.page !== S._pg, modal: !!S.modal && S.modal !== S._md, menu: S.menu && !S._mn, pop: !!S.pop && S.pop !== S._pp };
+  S._pg = S.page; S._md = S.modal; S._mn = S.menu; S._pp = S.pop;
+  const d = DIRS[S.v];
+  const own = S.page === 'dash' || (d.owns || []).includes(S.page);
+  const main = own ? DFN[S.v]() : PAGES[S.page]();
+  document.getElementById('app').innerHTML = `${header()}<main class="abody">${main}</main>${footer()}${S.modal && MODALS[S.modal] ? MODALS[S.modal]() : ''}`;
+}
+function live() { document.querySelectorAll('[data-live]').forEach(el => { const f = LIVE[el.dataset.live]; if (f) el.innerHTML = f(); }); }
+function toFrame() { if (window.scrollY > 0) window.scrollTo({ top: 0 }); }
+function go(p) { if (['dash', 'runs', 'models'].includes(S.page)) S.from = S.page; S.page = p; S.delc = false; S.modal = null; }
+const CORE = {
+  v: (b, v) => { S.v = v; S.page = 'dash'; S.from = 'dash'; S.scrollIntro = true; },
+  acct: (b, v) => { S.empty = v === 'new'; S.page = 'dash'; S.from = 'dash'; },
+  go: (b, v) => { if (v === 'new') { S.menu = false; S.modal = 'new'; return; } go(v); },
+  openRun: (b, v) => { S.run = +v; S.modal = 'run'; },
+  newFrom: (b, v) => { S.newSrc = { k: 'run', id: +v }; go('new'); },
+  tpl: (b, v) => { S.newSrc = { k: 'tpl', i: +v }; go('new'); },
+  menu: () => { S.menu = !S.menu; },
+  theme: () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; S.setv.theme = document.documentElement.dataset.theme; },
+  theme3: (b, v) => { S.setv.theme = v; if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; },
+  setTab: (b, v) => { S.set = v; if (S.page !== 'settings') go('settings'); },
+  setv: (b, v) => { S.setv[b.dataset.k] = v; },
+  star: (b, v) => { const r = runs().find(x => x.id === +v); if (r) r.star = !r.star; },
+  starM: (b, v) => { const m = MODELS.find(x => x.id === v); if (m) { if (S.empty) m.starNew = !m.starNew; else m.star = !m.star; } },
+  delc: () => { S.delc = !S.delc; },
+  noop: () => {},
+  stay: () => false,
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) { if (S.menu || S.pop) { S.menu = false; S.pop = null; render(); } return; }
+  const a = b.dataset.act, v = b.dataset.val, page = S.page;
+  if (a !== 'menu') S.menu = false;
+  if (S.pop && !b.closest('[data-pop]')) S.pop = null;
+  S.scrollIntro = false;
+  if (CORE[a]) { if (CORE[a](b, v) === false) return; }
+  else if (ACT[a]) { if (!ACT[a](b, v)) return; }
+  else return;
+  render();
+  if (S.page !== page || a === 'v') toFrame();
+});
+document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.input; if (k && INPUT[k]) { INPUT[k](e.target); live(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && (S.menu || S.modal || S.pop)) { S.menu = false; S.modal = null; S.pop = null; render(); } });
+
+// ---------- direction D: workspace (an app with a sidebar) ----------
+DIRS.D = {
+  n: 'Workspace',
+  idea: 'An app layout with a sidebar for backtests, models and settings. The dashboard shows the backtest in progress, the best backtests and the starred ones.',
+  g: ['Room to grow, each new section gets a place in the sidebar', 'Settings open inside the app, not on a separate page', 'The dashboard stays short, the full history lives in Backtests'],
+  w: ['The header nav shrinks to Instruments and API', 'The sidebar takes width on a laptop and turns into tabs on a phone'],
+  hnav: [],
+  owns: ['runs', 'models', 'settings'],
+};
+// best: the metric Best backtests ranks by
+S.d = { best: 'sharpe' };
+const DD_IC = {
+  last: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  best: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  dash: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  runs: '<path d="M3 17l5-5 4 4 8-8"/><path d="M14 8h6v6"/>',
+  models: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+};
+function ddLast() {
+  const rows = runs().filter(r => r.st !== 'running').slice(0, 6);
+  return `<section class="card dd-card">${ddHead('last', 'Last backtests', '<button type="button" class="link" data-act="dNav" data-val="runs">All backtests</button>')}${runsTable({ rows, drop: ['setup', 'bh', 'dd', 'trades', 'took'] })}</section>`;
+}
+// Best backtests: the top five as a small table. The metric headings rank the list, the one in use is marked.
+const DD_BEST = { sharpe: ['Sharpe', r => r.sharpe, num], ret: ['Return', r => r.ret, pct], dd: ['Drawdown', r => r.dd, pct], win: ['Win rate', r => r.win, v => `${v.toFixed(1)} %`] };
+function ddBest() {
+  const get = DD_BEST[S.d.best][1];
+  const list = ownRuns().filter(r => r.st === 'done').sort((a, b) => get(b) - get(a)).slice(0, 5);
+  const th = Object.entries(DD_BEST).map(([k, [l]]) => `<th class="num"><button type="button" class="dd-sort ${S.d.best === k ? 'on' : ''}" data-act="bestBy" data-val="${k}" aria-pressed="${S.d.best === k}">${l}${S.d.best === k ? ' ↓' : ''}</button></th>`).join('');
+  const td = r => Object.entries(DD_BEST).map(([k, [, g, f]]) => `<td class="num ${S.d.best === k ? 'dd-on' : ''} ${k === 'ret' ? (r.ret >= 0 ? 'up' : 'down') : ''}">${f(g(r))}</td>`).join('');
+  const rows = list.map((r, i) => `<tr class="rl" data-act="openRun" data-val="${r.id}"><td class="dd-rk">${i + 1}</td><td><span class="dd-b1"><b class="rid">#${r.id}</b>${ichips(r.inst, 2)}</span></td>${td(r)}</tr>`).join('');
+  return `<section class="card dd-card">${ddHead('best', 'Best backtests', `<span class="hint">by ${S.d.best === 'sharpe' ? 'Sharpe' : DD_BEST[S.d.best][0].toLowerCase()}</span>`)}<div class="tblwrap"><table class="tbl dd-best"><tr><th></th><th>Backtest</th>${th}</tr>${rows}</table></div></section>`;
+}
+// Framework marks (Simple Icons, CC0 data) with their brand colors
+const FW_IC = {
+  'Keras': ['#D00000', 'M24 0H0v24h24V0zM8.45 5.16l.2.17v6.24l6.46-6.45h1.96l.2.4-5.14 5.1 5.47 7.94-.2.3h-1.94l-4.65-6.88-2.16 2.08v4.6l-.19.2H7l-.2-.2V5.33l.17-.17h1.48z'],
+  'ONNX': ['#005CED', 'M23.0325 11.2963c-.0503 0-.1006 0-.1508.0126l-4.021-7.4387c.0754-.1383.1131-.289.1131-.4524 0-.5403-.4398-.9675-.9675-.9675-.2765 0-.5278.113-.7037.3015L9.286 1.156C9.2357.6785 8.821.3016 8.3184.3016c-.5277 0-.9675.4398-.9675.9675 0 .1634.0377.3141.113.4524l-6.245 8.9591c-.0753-.0251-.1633-.0377-.2513-.0377-.5403 0-.9675.4398-.9675.9676 0 .5403.4398.9675.9675.9675h.0377l3.3676 8.3309c-.0503.1257-.088.2639-.088.402 0 .5404.4398.9676.9676.9676.2764 0 .5277-.113.7036-.3015l10.1152.9926c.1005.4273.49.7288.9424.7288.5403 0 .9676-.4398.9676-.9675 0-.2388-.088-.465-.2262-.6283l5.1141-8.8712c.0503.0126.1005.0126.1634.0126.5403 0 .9675-.4398.9675-.9676 0-.5403-.4272-.98-.9675-.98zM17.2272 4.021c.1131.1508.2765.264.4524.3267l-1.533 11.5728c-.1005.0252-.1885.0503-.2764.1005L7.4513 8.708c.0251-.0754.0377-.1634.0377-.2514 0-.0628-.0126-.1256-.0126-.1884zm4.8754 8.5068l-5.177 3.556a1.105 1.105 0 0 0-.1256-.0753L18.3455 4.335h.0126l3.9456 7.288c-.1508.1759-.2388.3895-.2388.6408 0 .1005.0126.1885.0377.2638zM6.3832 7.5016c-.4649.0754-.8293.4775-.8293.955v.0628l-3.4555 2.0481 5.378-7.7026zm.3519 1.91c.1256-.0252.2513-.088.3518-.1634l8.356 7.2628c-.0377.113-.0628.2262-.0628.3518v.0503l-9.311 3.845c-.1382-.201-.3518-.3518-.6031-.402zm8.8963 8.1172c.1257.1382.3016.2513.5026.289l.465 4.046c-.201.1006-.3519.264-.4524.4524l-9.8136-.955zm1.1435.2136c.3267-.1633.5403-.49.5403-.867 0-.088-.0126-.1634-.0377-.2513l4.7372-3.2545-4.8 8.331zm.2513-14.3497l-9.889 4.31-.1131-.0755 1.2565-5.3906h.0377c.3393 0 .6409-.1759.8168-.4397l7.891 1.5706zM1.935 11.6105c0-.0629-.0126-.1257-.0126-.1885l3.9079-2.2995c.0754.0754.1633.1508.2638.201L4.8252 20.243l-3.2043-7.9036c.1885-.176.3142-.4398.3142-.7288Z'],
+  'scikit-learn': ['#F7931E', 'M15.601 5.53c-1.91.035-3.981.91-5.63 2.56-2.93 2.93-2.083 8.53-1.088 9.525.805.804 6.595 1.843 9.526-1.088a9.74 9.74 0 0 0 .584-.643c.043-.292.205-.66.489-1.106a1.848 1.848 0 0 1-.537.176c-.144.265-.37.55-.676.855-.354.335-.607.554-.76.656a.795.795 0 0 1-.437.152c-.35 0-.514-.308-.494-.924-.22.316-.425.549-.612.7a.914.914 0 0 1-.578.224c-.194 0-.36-.09-.496-.273a1.03 1.03 0 0 1-.193-.507 4.016 4.016 0 0 1-.726.583c-.224.132-.47.197-.74.197-.3 0-.543-.096-.727-.288a.978.978 0 0 1-.257-.524v.004c-.3.276-.564.48-.79.611a1.295 1.295 0 0 1-.649.197.693.693 0 0 1-.571-.275c-.145-.183-.218-.43-.218-.739 0-.464.101-1.02.302-1.67.201-.65.445-1.25.733-1.797l.842-.312a.21.21 0 0 1 .06-.013c.063 0 .116.047.157.14.04.095.061.221.061.38 0 .451-.104.888-.312 1.31-.207.422-.532.873-.974 1.352-.018.23-.027.388-.027.474 0 .193.036.345.106.458.071.113.165.169.282.169a.71.71 0 0 0 .382-.13c.132-.084.333-.26.602-.523.028-.418.187-.798.482-1.142.324-.38.685-.569 1.08-.569.206 0 .37.054.494.16a.524.524 0 0 1 .186.417c0 .458-.486.829-1.459 1.114.088.43.32.646.693.646a.807.807 0 0 0 .417-.117c.129-.076.321-.243.575-.497.032-.252.118-.495.259-.728.182-.3.416-.544.701-.73.285-.185.537-.278.756-.278.276 0 .47.127.58.381l.677-.374h.186l-.292.971c-.15.488-.226.823-.226 1.004 0 .19.067.285.202.285.086 0 .181-.045.285-.137.104-.092.25-.232.437-.42v.001c.143-.155.274-.32.392-.494-.19-.084-.285-.21-.285-.375 0-.17.058-.352.174-.545.116-.194.275-.29.479-.29.172 0 .258.088.258.265 0 .139-.05.338-.149.596.367-.04.687-.32.961-.842l.228-.01c1.059-2.438.828-5.075-.83-6.732-1.019-1.02-2.408-1.5-3.895-1.471zm4.725 8.203a8.938 8.938 0 0 1-1.333 2.151 1.09 1.09 0 0 0-.012.147c0 .168.047.309.14.423.092.113.206.17.34.17.296 0 .714-.264 1.254-.787-.001.04-.003.08-.003.121 0 .146.012.368.036.666l.733-.172c0-.2.003-.357.01-.474.01-.157.033-.33.066-.517.02-.11.07-.216.152-.315l.186-.216a5.276 5.276 0 0 1 .378-.397c.062-.055.116-.099.162-.13a.26.26 0 0 1 .123-.046c.055 0 .083.035.083.106 0 .07-.052.236-.156.497-.194.486-.292.848-.292 1.084 0 .175.046.314.136.418a.45.45 0 0 0 .358.155c.365 0 .803-.269 1.313-.808v-.381c-.361.426-.623.64-.784.64-.109 0-.163-.067-.163-.2 0-.1.065-.316.195-.65.19-.486.285-.836.285-1.048a.464.464 0 0 0-.112-.319.36.36 0 0 0-.282-.127c-.165 0-.354.077-.567.233-.213.156-.5.436-.863.84.053-.262.165-.622.335-1.08l-.809.156a6.54 6.54 0 0 0-.399 1.074c-.04.156-.07.316-.092.48a7.447 7.447 0 0 1-.49.45.38.38 0 0 1-.229.08.208.208 0 0 1-.174-.082.352.352 0 0 1-.064-.222c0-.1.019-.214.056-.343.038-.13.12-.373.249-.731l.308-.849zm-17.21-2.927c-.863-.016-1.67.263-2.261.854-1.352 1.352-1.07 3.827.631 5.527 1.7 1.701 4.95 1.21 5.527.632.467-.466 1.07-3.827-.631-5.527-.957-.957-2.158-1.465-3.267-1.486zm12.285.358h.166v.21H15.4zm.427 0h.166v.865l.46-.455h.195l-.364.362.428.684h-.198l-.357-.575-.164.166v.41h-.166zm1.016 0h.166v.21h-.166zm.481.122h.166v.288h.172v.135h-.172v.717c0 .037.006.062.02.075.012.013.037.02.074.02a.23.23 0 0 0 .078-.01v.141a.802.802 0 0 1-.136.014.23.23 0 0 1-.15-.043.15.15 0 0 1-.052-.123v-.79h-.141v-.136h.141zm-3.562.258c.081 0 .15.012.207.038.057.024.1.061.13.11s.045.106.045.173h-.176c-.006-.111-.075-.167-.208-.167a.285.285 0 0 0-.164.041.134.134 0 0 0-.06.117c0 .035.015.065.045.088.03.024.08.044.15.06l.16.039a.47.47 0 0 1 .224.105c.047.046.07.108.07.186a.3.3 0 0 1-.052.175.327.327 0 0 1-.152.116.585.585 0 0 1-.226.041c-.136 0-.24-.03-.309-.088-.069-.059-.105-.149-.109-.269h.176c.004.037.01.065.017.084a.166.166 0 0 0 .034.054c.044.043.112.065.204.065a.31.31 0 0 0 .177-.045.139.139 0 0 0 .067-.119.116.116 0 0 0-.038-.09.287.287 0 0 0-.124-.055l-.156-.038a1.248 1.248 0 0 1-.159-.05.359.359 0 0 1-.098-.061.22.22 0 0 1-.058-.083.32.32 0 0 1-.016-.108c0-.096.036-.174.109-.232a.45.45 0 0 1 .29-.087zm1.035 0a.46.46 0 0 1 .202.043.351.351 0 0 1 .187.212.577.577 0 0 1 .023.126h-.168a.256.256 0 0 0-.078-.168.242.242 0 0 0-.17-.06.248.248 0 0 0-.155.05.306.306 0 0 0-.1.144.662.662 0 0 0-.034.224.58.58 0 0 0 .035.214.299.299 0 0 0 .101.135.261.261 0 0 0 .157.048c.142 0 .227-.084.256-.252h.167a.519.519 0 0 1-.065.22.35.35 0 0 1-.146.138.464.464 0 0 1-.216.048.448.448 0 0 1-.246-.066.441.441 0 0 1-.161-.192.703.703 0 0 1-.057-.293c0-.085.01-.163.032-.233a.522.522 0 0 1 .095-.182.403.403 0 0 1 .15-.117.453.453 0 0 1 .191-.04zm.603.03h.166v1.046H15.4zm1.443 0h.166v1.046h-.166zm-5.05.618c-.08 0-.2.204-.356.611-.155.407-.308.977-.459 1.71.281-.312.509-.662.683-1.05.175-.387.262-.72.262-.999a.455.455 0 0 0-.036-.197c-.025-.05-.056-.075-.093-.075zm4.662 1.797c-.221 0-.431.188-.629.563-.197.376-.296.722-.296 1.038 0 .12.029.216.088.29a.273.273 0 0 0 .223.111c.221 0 .43-.188.625-.565.196-.377.294-.725.294-1.043a.457.457 0 0 0-.083-.29.269.269 0 0 0-.222-.104zm-2.848.007c-.146 0-.285.11-.417.333-.133.222-.2.51-.2.866.566-.159.849-.452.849-.881 0-.212-.077-.318-.232-.318Z'],
+  'PyTorch': ['#EE4C2C', 'M12.005 0L4.952 7.053a9.865 9.865 0 000 14.022 9.866 9.866 0 0014.022 0c3.984-3.9 3.986-10.205.085-14.023l-1.744 1.743c2.904 2.905 2.904 7.634 0 10.538s-7.634 2.904-10.538 0-2.904-7.634 0-10.538l4.647-4.646.582-.665zm3.568 3.899a1.327 1.327 0 00-1.327 1.327 1.327 1.327 0 001.327 1.328A1.327 1.327 0 0016.9 5.226 1.327 1.327 0 0015.573 3.9z'],
+  'TensorFlow': ['#FF6F00', 'M1.292 5.856L11.54 0v24l-4.095-2.378V7.603l-6.168 3.564.015-5.31zm21.43 5.311l-.014-5.31L12.46 0v24l4.095-2.378V14.87l3.092 1.788-.018-4.618-3.074-1.756V7.603l6.168 3.564z'],
+};
+const fwIcon = fw => FW_IC[fw] ? `<span class="dd-fw" style="--fw:${FW_IC[fw][0]}" title="${fw}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${FW_IC[fw][1]}"/></svg></span>` : '';
+// Starred widgets: the four best, then More. Backtests by Sharpe, models by the best Sharpe of their backtests.
+const DD_TOP = 4;
+function ddHead(ic, title, right) { return `<div class="sec-h"><div class="dd-h"><span class="dd-ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${DD_IC[ic]}</svg></span><h2>${title}</h2></div>${right}</div>`; }
+function ddMore(n, to) { return n > DD_TOP ? `<button type="button" class="dd-more" data-act="dNav" data-val="${to}"><span>More</span><span>${n} starred →</span></button>` : ''; }
+function ddStarred() {
+  const all = runs().filter(r => r.star).sort((a, b) => (b.sharpe ?? -99) - (a.sharpe ?? -99));
+  if (S.empty && !all.length) return '';
+  const rows = all.slice(0, DD_TOP).map(r => `<div class="dd-sr dd-sb" data-act="openRun" data-val="${r.id}"><button type="button" class="star on" title="Remove star" data-act="star" data-val="${r.id}" aria-label="Unstar backtest ${r.id}">★</button><span class="dd-b1"><b class="rid">#${r.id}</b>${ichips(r.inst, 2)}</span>${r.st === 'done' ? `${spark(eqRun(r), 52, 20)}<b class="dd-r1 ${r.ret >= 0 ? 'up' : 'down'}">${pct(r.ret)}</b>` : `<span></span><span class="dd-r1">${stBadge(r)}</span>`}<span class="dd-b2">${REP[r.rep]} · ${r.model}</span><span class="dd-r2">${r.st === 'done' ? `Sharpe ${num(r.sharpe)}` : ''}</span></div>`).join('');
+  return `<section class="card dd-card">${ddHead('runs', 'Starred backtests', '<span class="hint">by Sharpe</span>')}${rows ? `<div class="dd-list">${rows}</div>${ddMore(all.length, 'runs')}` : '<p class="hint">Star a backtest to keep it here.</p>'}</section>`;
+}
+function ddStarredModels() {
+  const stat = m => { const l = runs().filter(r => r.model === m.name), d = l.filter(r => r.st === 'done'); return { n: l.length, best: d.length ? Math.max(...d.map(r => r.sharpe)) : null }; };
+  const all = models().filter(mStar).map(m => ({ m, ...stat(m) })).sort((a, b) => (b.best ?? -99) - (a.best ?? -99) || b.n - a.n);
+  if (S.empty && !all.length) return '';
+  const rows = all.slice(0, DD_TOP).map(({ m, n, best }) => `<div class="dd-sr dd-mr" data-act="go" data-val="models"><button type="button" class="star on" title="Remove star" data-act="starM" data-val="${m.id}" aria-label="Unstar model ${m.name}">★</button>${fwIcon(m.fw)}<span class="dd-bm"><span class="dd-b1"><span class="dd-mn">${m.name}</span></span><span class="dd-b2 dd-vec">${m.shape ? `in ${m.shape.replace(/ × /g, '×')} · ` : ''}${m.fw}</span></span><span class="dd-bv"><b>${best === null ? '–' : num(best)}</b><span class="muted">${n} ${n === 1 ? 'backtest' : 'backtests'}</span></span></div>`).join('');
+  return `<section class="card dd-card">${ddHead('models', 'Starred models', '<span class="hint">by best Sharpe</span>')}${rows ? `<div class="dd-list">${rows}</div>${ddMore(all.length, 'models')}` : '<p class="hint">Star a model to keep it here.</p>'}</section>`;
+}
+function ddStart() {
+  const ex = runs().find(r => r.ex);
+  const steps = [
+    [`data-act="openRun" data-val="${ex.id}"`, 'Open the example backtest', 'See what a finished backtest shows'],
+    ['data-act="go" data-val="new"', 'Build your first backtest', 'Pick the data, a representation, a model and a rule'],
+    ['data-act="upOpen"', 'Upload your own model', 'We check that it is a real model with trained weights'],
+  ];
+  return `<section class="card dd-card"><div class="sec-h"><h2>Get started</h2><span class="hint">3 steps</span></div><div class="dd-gss">${steps.map((s, i) => `<button type="button" class="dd-gs" ${s[0]}><span class="n">${i + 1}</span><span><b>${s[1]}</b><span class="h">${s[2]}</span></span><span class="ar">→</span></button>`).join('')}</div></section>`;
+}
+function ddDash() {
+  // The full name, and no count under it: the widgets below carry the numbers
+  const head = `<div class="ttl"><div><h1>${S.empty ? `Welcome, ${USER.name}` : `Welcome back, ${USER.name}`}</h1>${S.empty ? '<p>Your account is ready. Start with the example backtest.</p>' : ''}</div></div>`;
+  const left = S.empty ? ddLast() : `${ddLast()}${ddBest()}`, right = `${ddStarred()}${ddStarredModels()}`;
+  return `${head}<div class="dd-dash">${S.empty ? ddStart() : ddActions()}<div class="dd-cols ${right ? '' : 'one'}"><div class="dd-col">${left}</div>${right ? `<div class="dd-col">${right}</div>` : ''}</div></div>`;
+}
+// Backtests page: search, a filter and a table that fits. A heading click sorts down, up, then back to newest first.
+S.d.q = ''; S.d.f = 'all'; S.d.m = null; S.d.sort = null; S.d.page = 1;
+const BT_PAGE = 10;
+const BT_COLS = [
+  ['id', 'Backtest', r => r.id, 'c-id'], ['inst', 'Instruments', null, 'c-inst'], ['model', 'Model', r => r.model, 'c-model'],
+  ['ret', 'Return', r => r.ret, 'c-ret num'], ['sharpe', 'Sharpe', r => r.sharpe, 'c-sh num'], ['dd', 'Max drawdown', r => r.dd, 'c-dd num'],
+  ['trades', 'Trades', r => r.trades, 'c-tr num'], ['when', 'When', r => r.id, 'c-when'],
+];
+const fwOf = name => (MODELS.find(m => m.name === name) || {}).fw;
+function btRows() {
+  const q = S.d.q.trim().toLowerCase();
+  let list = runs().filter(r => (S.d.f === 'all' || (S.d.f === 'star' ? r.star : r.st === 'failed')) && (!S.d.m || r.model === S.d.m));
+  if (q) list = list.filter(r => `#${r.id} ${r.inst.join(' ')} ${r.model}`.toLowerCase().includes(q));
+  if (S.d.sort) {
+    const [, , get] = BT_COLS.find(c => c[0] === S.d.sort.k), d = S.d.sort.dir === 'asc' ? 1 : -1;
+    // Failed backtests have no results and stay at the bottom either way
+    list = [...list].sort((x, y) => { const a = get(x), b = get(y); if (a == null || b == null) return (a == null) - (b == null); return (a > b ? 1 : a < b ? -1 : 0) * d; });
+  }
+  return list;
+}
+function btTable() {
+  const all = btRows(), pages = Math.max(1, Math.ceil(all.length / BT_PAGE));
+  if (S.d.page > pages) S.d.page = pages;
+  const list = all.slice((S.d.page - 1) * BT_PAGE, S.d.page * BT_PAGE), dash = '<span class="muted">–</span>';
+  const th = BT_COLS.map(([k, l, get, cls]) => { const on = S.d.sort && S.d.sort.k === k; return `<th class="${cls}">${get ? `<button type="button" class="dd-sort ${on ? 'on' : ''}" data-act="btSort" data-val="${k}">${l}${on ? (S.d.sort.dir === 'asc' ? ' ↑' : ' ↓') : ''}</button>` : l}</th>`; }).join('');
+  const rows = list.map(r => { const d = r.st === 'done'; return `<tr class="rl" data-act="openRun" data-val="${r.id}">
+    <td class="c-id"><span style="display:inline-flex;gap:6px;align-items:center"><button type="button" class="star ${r.star ? 'on' : ''}" title="${r.star ? 'Remove star' : 'Star'}" data-act="star" data-val="${r.id}" aria-label="Star backtest ${r.id}">${r.star ? '★' : '☆'}</button><span class="rid">#${r.id}</span>${r.ex ? '<span class="badge">Example</span>' : ''}</span></td>
+    <td class="c-inst">${ichips(r.inst, 2)}</td><td class="c-model"><span class="bt-m">${fwMini(fwOf(r.model))}<span>${r.model}</span></span></td>
+    <td class="c-ret num">${d ? `<b class="${r.ret >= 0 ? 'up' : 'down'}">${pct(r.ret)}</b>` : '<span class="badge bad">Failed</span>'}</td><td class="c-sh num">${d ? num(r.sharpe) : dash}</td><td class="c-dd num">${d ? pct(r.dd) : dash}</td><td class="c-tr num">${d ? fmtN(r.trades) : dash}</td><td class="c-when muted">${when(r)}</td></tr>`; }).join('');
+  return `<table class="tbl bt-t"><tr>${th}</tr>${rows || `<tr><td colspan="${BT_COLS.length}" class="muted bt-none">No backtests match</td></tr>`}</table>`;
+}
+function btCount() { const n = btRows().length, all = runs().length; return n === all ? `${all} ${all === 1 ? 'backtest' : 'backtests'}` : `${n} of ${all}`; }
+function btPager() {
+  const pages = Math.max(1, Math.ceil(btRows().length / BT_PAGE)), p = S.d.page;
+  if (pages === 1) return '';
+  const link = (to, on, l) => on ? `<button type="button" class="pg-l" data-act="btPage" data-val="${to}">${l}</button>` : `<span class="pg-l off" aria-disabled="true">${l}</span>`;
+  return `<nav class="pg" aria-label="Pages">${link(p - 1, p > 1, 'Previous')}<span class="muted">Page ${p} of ${pages}</span>${link(p + 1, p < pages, 'Next')}</nav>`;
+}
+LIVE.bt = btTable; LIVE.btn = btCount; LIVE.btp = btPager;
+INPUT.btq = el => { S.d.q = el.value; S.d.page = 1; };
+ACT.btPage = (b, v) => { S.d.page = +v; return true; };
+ACT.btSort = (b, v) => { S.d.page = 1; const s = S.d.sort; S.d.sort = !s || s.k !== v ? { k: v, dir: v === 'model' ? 'asc' : 'desc' } : s.dir === (v === 'model' ? 'asc' : 'desc') ? { k: v, dir: v === 'model' ? 'desc' : 'asc' } : null; return true; };
+ACT.btFilter = (b, v) => { S.d.f = v; S.d.page = 1; return true; };
+ACT.btModel = (b, v) => { S.d.m = v || null; S.d.page = 1; return true; };
+ACT.btPop = () => { S.pop = S.pop === 'bt' ? null : 'bt'; return true; };
+const BT_SHOW = [['all', 'All backtests'], ['star', 'Starred'], ['fail', 'Failed']];
+function btSummary() { const parts = [S.d.f !== 'all' && BT_SHOW.find(x => x[0] === S.d.f)[1], S.d.m].filter(Boolean); return parts.length ? parts.join(' · ') : 'All backtests'; }
+const CHECK = '<svg class="i fp-ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>';
+function btFilters() {
+  const n = { all: runs().length, star: runs().filter(r => r.star).length, fail: runs().filter(r => r.st === 'failed').length };
+  const opt = (on, act, val, label, count) => `<button type="button" class="fp-o ${on ? 'on' : ''}" role="option" aria-selected="${on}" data-act="${act}" data-val="${val}"><span>${label}</span><span class="fp-n">${count}</span>${CHECK}</button>`;
+  const used = models().filter(m => runs().some(r => r.model === m.name));
+  const show = BT_SHOW.map(([k, l]) => opt(S.d.f === k, 'btFilter', k, l, n[k])).join('');
+  const mods = opt(!S.d.m, 'btModel', '', 'All models', '') + used.map(m => opt(S.d.m === m.name, 'btModel', m.name, `<span class="bt-m">${fwMini(m.fw)}${m.name}</span>`, runs().filter(r => r.model === m.name).length)).join('');
+  const panel = S.pop === 'bt' ? `<div class="fp ${S.anim && S.anim.pop ? 'in' : ''}" data-pop data-act="stay" role="dialog" aria-label="Filters"><div class="fp-s"><p class="fp-h">Show</p><div role="listbox">${show}</div></div><div class="fp-s"><p class="fp-h">Model</p><div role="listbox">${mods}</div></div></div>` : '';
+  return `<div class="fp-w" data-pop><button type="button" class="fp-t ${S.pop === 'bt' ? 'open' : ''}" data-act="btPop" aria-expanded="${S.pop === 'bt'}" aria-label="Filters: ${btSummary()}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span class="fp-sum">${btSummary()}</span><svg class="i fp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>${panel}</div>`;
+}
+function ddRuns() {
+  const tools = `<div class="bt-tools"><label class="bt-q"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input class="inp" type="search" data-input="btq" value="${esc(S.d.q)}" placeholder="Number, instrument or model, e.g. aapl" aria-label="Search backtests"></label>${btFilters()}</div>`;
+  return `<div class="ttl"><div><h1>Backtests</h1><p data-live="btn">${btCount()}</p></div></div>${tools}<div class="card bt-card" data-live="bt">${btTable()}</div><div data-live="btp">${btPager()}</div>`;
+}
+// Models page: the dashboard's Upload card by the title, then a tile per model.
+// Uploaded models can be renamed and deleted, built-in ones cannot.
+const MD_IC = {
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+  del: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+};
+function mdStat(m) { const l = runs().filter(r => r.model === m.name), d = l.filter(r => r.st === 'done'); return { n: l.length, best: d.length ? Math.max(...d.map(r => r.sharpe)) : null }; }
+function mdTile(m) {
+  const { n, best } = mdStat(m), up = m.src === 'up';
+  const acts = up ? `<div class="md-acts"><button type="button" class="btn sm ghost" data-act="mdRename" data-val="${m.id}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${MD_IC.edit}</svg>Rename</button><button type="button" class="btn sm ghost md-del" data-act="mdDelete" data-val="${m.id}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${MD_IC.del}</svg>Delete</button></div>` : '<div class="md-acts"><span class="hint">Built in, comes with CandleStack</span></div>';
+  return `<article class="card md-t"><div class="md-top">${fwIcon(m.fw)}<button type="button" class="star ${mStar(m) ? 'on' : ''}" title="${mStar(m) ? 'Remove star' : 'Star'}" data-act="starM" data-val="${m.id}" aria-label="Star model ${m.name}">${mStar(m) ? '★' : '☆'}</button></div>
+    <div class="md-name"><b title="${m.name}">${m.name}</b><span class="hint">${m.fw} · ${m.size}${up ? ` · added ${m.added}` : ''}</span></div>
+    <div class="md-vec">${m.shape ? `in ${m.shape.replace(/ × /g, '×')}` : 'Shape not in the file'}</div>
+    <div class="md-st"><div><b>${best === null ? '–' : num(best)}</b><span class="hint">best Sharpe</span></div><div><b>${n}</b><span class="hint">${n === 1 ? 'backtest' : 'backtests'}</span></div></div>
+    ${acts}</article>`;
+}
+function ddModels() {
+  const list = models(), mb = S.empty ? 0 : USAGE.modelsMB;
+  const upload = `<button type="button" class="qa-c md-up" data-act="upOpen"><span class="qa-i">${qi('up')}</span><span class="qa-t"><b>Upload model</b><span class="qa-fws">${FWS.map(fwMini).join('')}</span></span></button>`;
+  return `<div class="ttl"><div><h1>Models</h1><p>${list.length} ${list.length === 1 ? 'model' : 'models'} · ${mb} MB of ${USAGE.capMB} MB used</p></div>${upload}</div><div class="md-g">${list.map(mdTile).join('')}</div>`;
+}
+// Settings: one page of cards in the dashboard's style, each with an icon by its title.
+// Sign-in is GitHub or Google only, so there is no password. The last connected method cannot be removed.
+const ST_IC = {
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  key: '<circle cx="8" cy="14" r="4"/><path d="M11 11l9-9M16 6l3 3M14 8l2 2"/>',
+  sliders: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  look: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
+  data: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  plug: '<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/>',
+  code: '<path d="M8 6l-6 6 6 6"/><path d="M16 6l6 6-6 6"/>',
+  warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+};
+const SSO_IC = { GitHub: ['0 0 24 24', `<path fill="var(--ink)" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>`], Google: ['0 0 48 48', '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>'] };
+S.sso = { GitHub: true, Google: false };
+// Benchmarks: the instruments themselves, or an index fund
+const BENCH = [['bh', 'Buy and hold', 'The same instruments, bought and kept'], ['SPY', 'SPDR S&amp;P 500 ETF', 'The 500 largest US companies'], ['QQQ', 'Invesco QQQ', 'The Nasdaq 100'], ['DIA', 'SPDR Dow Jones ETF', 'The 30 Dow Jones companies']];
+ACT.benchPop = () => { S.pop = S.pop === 'bench' ? null : 'bench'; return true; };
+ACT.benchPick = (b, v) => { S.setv.bench = v; S.pop = null; return true; };
+ACT.svToggle = (b, v) => { S.setv[v] = !S.setv[v]; document.documentElement.classList.toggle('calm', !!S.setv.calm); return true; };
+INPUT['sv-the'] = el => { S.setv.the = +el.value; el.style.setProperty('--p', `${el.value / 0.5 * 100}%`); };
+INPUT['sv-sl'] = el => { S.setv.sl = +el.value; el.style.setProperty('--p', `${(el.value - 1) / 19 * 100}%`); };
+LIVE['sv-the'] = () => S.setv.the.toFixed(2);
+LIVE['sv-sl'] = () => `${S.setv.sl} %`;
+const USER_ID = 'usr_7f3k2m9qx4';
+
+function stHead(ic, title, right = '') { return `<div class="sec-h"><div class="dd-h"><span class="dd-ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ST_IC[ic]}</svg></span><h2>${title}</h2></div>${right}</div>`; }
+const stRow = (label, ctl, hint) => `<div class="st-r"><span class="st-l">${label}${hint ? `<span class="hint">${hint}</span>` : ''}</span><div class="st-c">${ctl}</div></div>`;
+const stInp = (v, label) => `<input class="inp" value="${v}" aria-label="${label}">`;
+function stSso(name) {
+  const on = S.sso[name], only = on && Object.values(S.sso).filter(Boolean).length === 1, [box, marks] = SSO_IC[name];
+  return `<div class="st-sso"><span class="st-si"><svg viewBox="${box}" aria-hidden="true">${marks}</svg></span><span class="st-sn"><b>${name}</b><span class="hint">${on ? `Connected · ${USER.email}` : 'Not connected'}</span></span>${on ? `<button type="button" class="btn sm" data-act="ssoToggle" data-val="${name}" ${only ? 'disabled title="Your only way to sign in"' : ''}>Disconnect</button>` : `<button type="button" class="btn sm pri" data-act="ssoToggle" data-val="${name}">Connect</button>`}</div>`;
+}
+ACT.ssoToggle = (b, v) => { S.sso[v] = !S.sso[v]; return true; };
+ACT.delAcct = () => { S.modal = 'delAcct'; return true; };
+function ddSettings() {
+  const mb = S.empty ? 0 : USAGE.modelsMB, ups = models().filter(m => m.src === 'up').length, nb = runs().length;
+  const profile = `<section class="card dd-card st-card">${stHead('user', 'Profile')}<div class="st-me"><span class="avatar st-av">${USER.ini}</span><span><b>${USER.name}</b><span class="hint">${USER.email}</span></span></div>
+    ${stRow('Display name', stInp(USER.name, 'Display name'))}${stRow('Email', `<span>${USER.email}</span>`)}${stRow('User ID', `<span class="st-id"><code>${USER_ID}</code></span>`)}<div class="st-f"><button type="button" class="btn sm pri">Save</button></div></section>`;
+  const signin = `<section class="card dd-card st-card">${stHead('key', 'Sign-in')}<p class="hint st-lead">Sign in with either. Keep at least one connected.</p><div class="st-ssos">${stSso('GitHub')}${stSso('Google')}</div></section>`;
+  // Backtest defaults: direction as two cards, sliders for threshold and stop loss, units inside the fields, a benchmark list
+  const dirCard = (k, t, d, arrows) => `<button type="button" class="st-dir ${S.setv.dir === k ? 'on' : ''}" data-act="setv" data-k="dir" data-val="${k}" aria-pressed="${S.setv.dir === k}"><span class="st-arr">${arrows}</span><b>${t}</b><span class="hint">${d}</span></button>`;
+  const UP = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>', DN = '<svg class="i dn" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';
+  const slider = (k, min, max, step, fmt, label) => `<div class="st-sl"><input type="range" min="${min}" max="${max}" step="${step}" value="${S.setv[k]}" data-input="sv-${k}" aria-label="${label}" style="--p:${(S.setv[k] - min) / (max - min) * 100}%"><span class="st-val" data-live="sv-${k}">${fmt(S.setv[k])}</span></div>`;
+  const unit = (v, u, label) => `<span class="md-in st-unit"><input class="inp" value="${v}" aria-label="${label}"><span class="md-ext">${u}</span></span>`;
+  const bench = BENCH.find(x => x[0] === S.setv.bench);
+  const benchCtl = `<div class="fp-w" data-pop><button type="button" class="fp-t st-bt ${S.pop === 'bench' ? 'open' : ''}" data-act="benchPop" aria-expanded="${S.pop === 'bench'}"><span class="st-bk">${bench[0] === 'bh' ? 'B&amp;H' : bench[0]}</span><span class="fp-sum">${bench[1]}</span><svg class="i fp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    ${S.pop === 'bench' ? `<div class="fp st-bp ${S.anim && S.anim.pop ? 'in' : ''}" data-pop data-act="stay" role="listbox" aria-label="Benchmark">${BENCH.map(([k, n, d]) => `<button type="button" class="fp-o st-bo ${S.setv.bench === k ? 'on' : ''}" role="option" aria-selected="${S.setv.bench === k}" data-act="benchPick" data-val="${k}"><span class="st-bk">${k === 'bh' ? 'B&amp;H' : k}</span><span class="st-bn"><span>${n}</span><span class="hint">${d}</span></span><svg class="i fp-ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg></button>`).join('')}</div>` : ''}</div>`;
+  const defaults = `<section class="card dd-card st-card">${stHead('sliders', 'Backtest defaults', '<span class="hint">New backtests start here</span>')}
+    ${stRow('Timeframe', seg(['5m', '30m', '1h', '1d'], S.setv.tf, 'setv', 'tf'))}${stRow('Test period', `<div class="st-two">${stInp('2021-01-04', 'From')}<span class="muted">to</span>${stInp('2024-12-31', 'To')}</div>`)}
+    <div class="st-r st-rtop"><span class="st-l">Direction</span><div class="st-c st-dirs">${dirCard('long', 'Long only', 'Buy on a signal, sell on the exit', UP)}${dirCard('both', 'Long and short', 'Also sell short when it points down', UP + DN)}</div></div>
+    ${stRow('Threshold', slider('the', 0, 0.5, 0.01, v => (+v).toFixed(2), 'Threshold'), 'Signal strength to trade')}${stRow('Stop loss', slider('sl', 1, 20, 1, v => `${v} %`, 'Stop loss'), 'Exit when a trade loses this much')}
+    ${stRow('Fees', unit('0.1', '% per side', 'Fees'))}${stRow('Slippage', unit('0.02', '%', 'Slippage'))}${stRow('Benchmark', benchCtl, 'What each backtest is measured against')}<div class="st-f"><button type="button" class="btn sm pri">Save defaults</button></div></section>`;
+  // Appearance: theme, time zone, date and time formats, reduce motion
+  const tz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return 'Europe/Bratislava'; } })();
+  const sw = (k, label) => `<button type="button" class="st-sw ${S.setv[k] ? 'on' : ''}" role="switch" aria-checked="${!!S.setv[k]}" aria-label="${label}" data-act="svToggle" data-val="${k}"><i></i></button>`;
+  const look = `<section class="card dd-card st-card">${stHead('look', 'Appearance')}${stRow('Theme', seg([['light', 'Light'], ['dark', 'Dark']], isDark() ? 'dark' : 'light', 'theme3'))}
+    ${stRow('Time zone', seg([['ny', 'New York'], ['local', tz.split('/').pop().replace(/_/g, ' ')]], S.setv.tz, 'setv', 'tz'), S.setv.tz === 'ny' ? 'Exchange time' : 'Your time zone')}
+    ${stRow('Date format', seg([['dmy', '12 Oct 2024'], ['iso', '2024-10-12'], ['dot', '12.10.2024']], S.setv.df, 'setv', 'df'))}${stRow('Time format', seg([['24', '16:05'], ['12', '4:05 PM']], S.setv.tf2, 'setv', 'tf2'))}
+    ${stRow('Reduce motion', sw('calm', 'Reduce motion'), 'Turns off the small animations')}</section>`;
+  const data = `<section class="card dd-card st-card">${stHead('data', 'Data and storage')}${stRow('Market data', '<span>Alpaca, SIP feed</span>', 'Delayed 15 min')}${stRow('Backtests', `<span class="mono">${nb}</span>`, 'Kept until you delete them')}
+    ${stRow('Models', `<div class="st-meter"><span class="mono">${mb} MB of ${USAGE.capMB} MB</span><span class="meter"><i style="width:${mb / USAGE.capMB * 100}%"></i></span></div>`, `${ups} uploaded`)}</section>`;
+  // API and MCP: keys for scripts and the API, and the MCP server for Claude or ChatGPT (not built yet)
+  const soon = '<span class="cs-tag st-soon"><span class="cs-dot"></span>Coming soon</span>';
+  const apps = `<section class="card dd-card st-card st-mcp">${stHead('code', 'API keys', soon)}<p class="hint st-lead">Run backtests and read results from your own scripts. A key acts as you, so you keep it secret.</p>
+    ${stRow('Public API', '<a class="link" href="https://app.candlestack.tech/api/v1/docs" target="_blank" rel="noopener">API docs</a>', 'Instruments and candles, no key needed')}</section>
+    <section class="card dd-card st-card st-mcp">${stHead('plug', 'MCP server', soon)}<p class="hint st-lead">Use CandleStack from Claude or ChatGPT. Ask about your backtests, start new ones and compare them in a chat. You sign in with your CandleStack account.</p>
+    ${stRow('Server URL', '<span class="st-id"><code>https://app.candlestack.tech/mcp</code></span>')}</section>`;
+  const danger = `<section class="card dd-card st-card st-danger">${stHead('warn', 'Account')}<div class="st-dz"><div><b>Sign out everywhere</b><span class="hint">Ends every session on every device.</span></div><button type="button" class="btn sm">Sign out everywhere</button></div><div class="st-dz"><div><b>Delete account</b><span class="hint">Deletes your backtests and uploaded models. This cannot be undone.</span></div><button type="button" class="btn sm danger" data-act="delAcct">Delete account</button></div></section>`;
+  const SECT = { profile: ['Profile', profile], signin: ['Sign-in', signin], defaults: ['Backtest defaults', defaults], look: ['Appearance', look], data: ['Data and storage', data], apps: ['API and MCP', apps], acct: ['Account', danger] };
+  if (!SECT[S.set]) S.set = 'profile';
+  const tabs = `<nav class="st-tabs" aria-label="Settings sections">${Object.entries(SECT).map(([k, [l]]) => `<button type="button" class="${S.set === k ? 'on' : ''}" data-act="setTab" data-val="${k}" ${S.set === k ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav>`;
+  const tabIn = S.set !== S._st; S._st = S.set;
+  return `<div class="ttl"><div><h1>Settings</h1><p>Your account and how new backtests start</p></div></div>${tabs}<div class="st-one ${tabIn ? 'in' : ''}">${SECT[S.set][1]}</div>`;
+}
+function ddSide() {
+  const on = S.page;
+  const items = [['dash', 'Dashboard', ''], ['runs', 'Backtests', runs().length], ['models', 'Models', models().length], ['settings', 'Settings', '']];
+  const nav = items.map(([k, l, n]) => `<button type="button" class="dd-nav ${on === k ? 'on' : ''}" ${k === 'settings' ? 'data-act="setTab" data-val="profile"' : `data-act="dNav" data-val="${k}"`} ${on === k ? 'aria-current="page"' : ''}><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${DD_IC[k]}</svg><span>${l}</span>${n !== '' ? `<span class="dd-n">${n}</span>` : ''}</button>`).join('');
+  const mb = S.empty ? 0 : USAGE.modelsMB;
+  return `<nav class="card dd-side" aria-label="Workspace">${nav}<div class="dd-sfoot"><span class="eyebrow">Storage</span><span class="meter"><i style="width:${mb / USAGE.capMB * 100}%"></i></span><span class="dd-s">${mb} MB of ${USAGE.capMB} MB models</span><span class="hint">${DATA_NOTE}</span></div></nav>`;
+}
+ACT.bestBy = (b, v) => { S.d.best = v; return true; };
+ACT.dNav = (b, v) => {
+  if (S.page !== v) go(v);
+  return true;
+};
+DFN.D = () => {
+  const main = S.page === 'runs' ? ddRuns() : S.page === 'models' ? ddModels() : S.page === 'settings' ? ddSettings() : ddDash();
+  return `<div class="dd-ws">${ddSide()}<div class="dd-main ${S.anim && S.anim.page ? 'in' : ''}">${main}</div></div>`;
+};
+
+// ---------- quick actions, model upload, compare ----------
+const QA_IC = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  up: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/>',
+  cmp: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
+  ok: '<path d="M5 12l4 4 10-10"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+};
+const qi = (k, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${QA_IC[k]}</svg>`;
+const fwMini = fw => FW_IC[fw] ? `<svg class="fw-mini" style="--fw:${FW_IC[fw][0]}" viewBox="0 0 24 24" role="img" aria-label="${fw}"><path d="${FW_IC[fw][1]}"/></svg>` : '';
+const FWS = ['Keras', 'TensorFlow', 'PyTorch', 'ONNX', 'scikit-learn'];
+
+// The strip under the greeting
+function ddActions() {
+  return `<div class="qa">
+    <button type="button" class="qa-c pri" data-act="go" data-val="new"><span class="qa-i">${qi('plus')}</span><span class="qa-t"><b>New backtest</b><span class="h">Pick the data, a model and a rule</span></span></button>
+    <button type="button" class="qa-c" data-act="upOpen"><span class="qa-i">${qi('up')}</span><span class="qa-t"><b>Upload model</b><span class="qa-fws">${FWS.map(fwMini).join('')}</span></span></button>
+    <button type="button" class="qa-c" data-act="cmpOpen"><span class="qa-i">${qi('cmp')}</span><span class="qa-t"><b>Compare backtests</b><span class="h">Two side by side on one chart</span></span></button>
+  </div>`;
+}
+
+// ---------- upload: a file, then two checks ----------
+// Example files in the chooser. Two pass. The last has the layers but no trained weights.
+const UP_FILES = [
+  { name: 'lstm-signals.keras', fw: 'Keras', mb: 12.4, shape: [25, 101, 1], params: '1.24 M', when: 'Today 15:02', ok: true },
+  { name: 'tcn-signals.pt', fw: 'PyTorch', mb: 8.1, shape: null, params: '0.86 M', when: 'Yesterday 21:40', ok: true },
+  { name: 'lstm-draft.keras', fw: 'Keras', mb: 0.3, shape: [25, 23, 1], params: '0.31 M', when: '12 Oct', ok: false },
+];
+// What "a real model" means per format: it opens as that format and runs no code of its own
+const UP_SAFE = { Keras: 'Opens as a Keras model, no custom code inside', PyTorch: 'Opens as PyTorch weights, no pickled code', ONNX: 'Opens as an ONNX graph', TensorFlow: 'Opens as a TensorFlow SavedModel, no custom ops', 'scikit-learn': 'Opens as a scikit-learn estimator from a trusted format' };
+S.up = null;
+S.modal = null;
+const upFile = () => UP_FILES[S.up.f];
+const shapeText = s => `${s[0]} × ${s[1]} → ${s[2]}`;
+
+function modalShell(title, body, foot, wide) {
+  return `<div class="mbg ${S.anim && S.anim.modal ? 'in' : ''}" data-act="closeModal"><div class="mdl ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${title}" data-act="stay">
+    <div class="mdl-h"><h2>${title}</h2><button type="button" class="btn ghost icon" data-act="closeModal" aria-label="Close">${qi('x')}</button></div>
+    <div class="mdl-b">${body}</div>${foot ? `<div class="mdl-f">${foot}</div>` : ''}</div></div>`;
+}
+const chk = (ok, t, s) => `<li class="ck-r ${ok ? 'ok' : 'bad'}"><span class="ck-i">${qi(ok ? 'ok' : 'x')}</span><span><b>${t}</b>${s ? `<span class="h">${s}</span>` : ''}</span></li>`;
+function upBody() {
+  const u = S.up;
+  if (u.step === 0) {
+    return `<button type="button" class="up-drop" data-act="upPick"><span class="qa-i">${qi('up')}</span><b>Drop a trained model here</b><span class="h">or click to choose a file. Up to 100 MB.</span><span class="qa-fws">${FWS.map(f => `<span class="fw-l">${fwMini(f)}${f}</span>`).join('')}</span></button>
+      ${u.picker ? `<div class="up-pick"><span class="eyebrow">Downloads</span>${UP_FILES.map((f, i) => `<button type="button" class="up-pf" data-act="upFile" data-val="${i}">${fwIcon(f.fw)}<span><b>${f.name}</b><span class="h">${f.mb} MB · ${f.when}</span></span></button>`).join('')}</div>` : ''}`;
+  }
+  const f = upFile();
+  const head = `<div class="up-file">${fwIcon(f.fw)}<span><b>${f.name}</b><span class="h">${f.fw} · ${f.mb} MB</span></span></div>`;
+  const checks = `<ul class="cks">${chk(true, UP_SAFE[f.fw])}${f.ok ? chk(true, 'Trained weights inside', `${f.params} parameters`) : chk(false, 'No trained weights in the file', 'It holds the layers only. Save the model after training and upload that file.')}</ul>`;
+  const done = f.ok ? `<div class="up-ok"><b>${f.name} is ready</b><span class="h">${f.fw} · ${f.params} parameters${f.shape ? ` · in ${shapeText(f.shape)}` : ''}</span></div>` : '';
+  return `${head}${checks}${done}`;
+}
+function upFoot() {
+  if (S.up.step === 0) return '';
+  if (!upFile().ok) return '<button type="button" class="btn" data-act="closeModal">Cancel</button><button type="button" class="btn pri" data-act="upAgain">Choose another file</button>';
+  return '<button type="button" class="btn" data-act="upDone" data-val="models">Done</button><button type="button" class="btn pri" data-act="upDone" data-val="bt">Backtest with it</button>';
+}
+MODALS.upload = () => modalShell('Upload model', upBody(), upFoot());
+ACT.upOpen = () => { S.modal = 'upload'; S.up = { f: 0, step: 0, picker: false }; return true; };
+ACT.upPick = () => { S.up.picker = !S.up.picker; return true; };
+ACT.upFile = (b, v) => { S.up = { f: +v, step: 1, picker: false }; return true; };
+ACT.upAgain = () => { S.up = { f: 0, step: 0, picker: true }; return true; };
+ACT.upDone = (b, v) => {
+  const f = upFile();
+  if (!MODELS.find(m => m.name === f.name)) {
+    MODELS.push({ id: `up${S.up.f}`, name: f.name, fw: f.fw, src: 'up', fresh: true, reads: 'windows', shape: f.shape ? shapeText(f.shape) : null, runs: 0, size: `${f.mb} MB`, added: 'Today' });
+    USAGE.modelsMB = +(USAGE.modelsMB + f.mb).toFixed(1);
+  }
+  S.modal = null;
+  if (v === 'bt') S.modal = 'new'; else go('models');
+  return true;
+};
+ACT.closeModal = () => { S.modal = null; return true; };
+
+// ---------- compare: not built yet ----------
+// The home page's Coming soon: a faint sketch of a runs table, fading out downwards, the tag over it
+const CS_HEAD = [60, 50, 45, 55, 60];
+const CS_ROWS = [[[70, 85, 60, 72, 70], 'up'], [[55, 75, 70, 58, 70], 'up'], [[65, 90, 50, 50, 70], 'down'], [[60, 70, 65, 40, 70], 'up']];
+const csBar = (w, cls = '') => `<span class="cs-bar ${cls}" style="width:${w}%"></span>`;
+function comingSoon() {
+  const head = `<div class="cs-row">${CS_HEAD.map(w => csBar(w, 'f')).join('')}</div>`;
+  const rows = CS_ROWS.map(([ws, tone]) => `<div class="cs-row">${ws.map((w, i) => csBar(w, i === 3 ? tone : '')).join('')}</div>`).join('');
+  return `<div class="cs"><div class="cs-sk" aria-hidden="true">${head}${rows}</div><span class="cs-tag"><span class="cs-dot"></span>Coming soon</span></div>`;
+}
+MODALS.compare = () => modalShell('Compare backtests', `<p class="h">Change one layer, run again and see which combination holds up across market conditions.</p>${comingSoon()}`);
+ACT.cmpOpen = () => { S.modal = 'compare'; return true; };
+// A backtest's own page: a sketch of result tiles over a faint equity line
+function runSoon() {
+  const tiles = [[55, 70, 'up'], [45, 50, ''], [60, 55, 'down'], [50, 45, '']].map(([a, b, t]) => `<div class="cs-tile">${csBar(a, 'f')}${csBar(b, t)}</div>`).join('');
+  const line = 'M0 70 L40 62 L80 66 L120 52 L160 56 L200 40 L240 46 L280 30 L320 36 L360 22 L400 26';
+  const bh = 'M0 70 L50 64 L100 60 L150 58 L200 50 L250 48 L300 40 L350 38 L400 32';
+  return `<div class="cs"><div class="cs-sk" aria-hidden="true"><div class="cs-tiles">${tiles}</div><svg class="cs-ch" viewBox="0 0 400 80" preserveAspectRatio="none"><path class="cs-bh" d="${bh}"/><path class="cs-eq" d="${line}"/></svg></div><span class="cs-tag"><span class="cs-dot"></span>Coming soon</span></div>`;
+}
+// The builder: a sketch of the five blocks in a row, wired left to right
+function newSoon() {
+  const nodes = [[60, 75], [70, 55], [65, 80], [55, 60], [60, 50]].map(([a, b], i) => `${i ? '<span class="cs-wire"></span>' : ''}<div class="cs-node">${csBar(a, 'f')}${csBar(b, i === 4 ? 'up' : '')}</div>`).join('');
+  return `<div class="cs"><div class="cs-sk" aria-hidden="true"><div class="cs-pipe">${nodes}</div><div class="cs-pane">${csBar(35, 'f')}${csBar(80)}${csBar(65)}${csBar(72)}</div></div><span class="cs-tag"><span class="cs-dot"></span>Coming soon</span></div>`;
+}
+// ---------- models: rename, delete ----------
+S.md = null;
+const mdById = id => MODELS.find(m => m.id === id);
+const splitExt = name => { const i = name.lastIndexOf('.'); return i > 0 ? [name.slice(0, i), name.slice(i)] : [name, '']; };
+MODALS.rename = () => {
+  const m = mdById(S.md), [stem, ext] = splitExt(m.name);
+  return modalShell('Rename model', `<label class="md-f"><span class="hint">Name</span><span class="md-in"><input class="inp" id="md-name" value="${esc(stem)}" aria-label="Model name" maxlength="60"><span class="md-ext">${ext}</span></span></label><p class="h">The extension stays ${ext}. Backtests that used this model show the new name.</p>`,
+    '<button type="button" class="btn" data-act="closeModal">Cancel</button><button type="button" class="btn pri" data-act="mdRenameOk">Save</button>');
+};
+MODALS.del = () => {
+  const m = mdById(S.md), n = runs().filter(r => r.model === m.name).length;
+  return modalShell(`Delete ${m.name}?`, `<p>The file goes from your models and frees ${m.size}.${n === 1 ? ' The backtest that used it stays, with its results.' : n ? ` The ${n} backtests that used it stay, with their results.` : ''} This cannot be undone.</p>`,
+    '<button type="button" class="btn" data-act="closeModal">Cancel</button><button type="button" class="btn danger pri" data-act="mdDeleteOk">Delete</button>');
+};
+ACT.mdRename = (b, v) => { S.md = v; S.modal = 'rename'; return true; };
+ACT.mdDelete = (b, v) => { S.md = v; S.modal = 'del'; return true; };
+ACT.mdRenameOk = () => {
+  const m = mdById(S.md), [, ext] = splitExt(m.name), stem = ((document.getElementById('md-name') || {}).value || '').trim();
+  if (stem) { const name = stem + ext; RUNS.forEach(r => { if (r.model === m.name) r.model = name; }); m.name = name; }
+  S.modal = null; return true;
+};
+ACT.mdDeleteOk = () => { const i = MODELS.findIndex(m => m.id === S.md); if (i >= 0) { USAGE.modelsMB = +(USAGE.modelsMB - parseFloat(MODELS[i].size)).toFixed(1); MODELS.splice(i, 1); } S.modal = null; return true; };
+MODALS.delAcct = () => modalShell('Delete account?', `<p>This deletes ${runs().length} backtests, ${models().filter(m => m.src === 'up').length} uploaded models and your account. This cannot be undone.</p>`,
+  '<button type="button" class="btn" data-act="closeModal">Cancel</button><button type="button" class="btn danger pri" data-act="closeModal">Delete account</button>');
+MODALS.new = () => modalShell('New backtest', `<p class="h">Pick the data, a representation, a model and a rule, then run it against buy and hold.</p>${newSoon()}`);
+MODALS.run = () => { const r = runById(S.run); return modalShell(`Backtest #${r.id}`, `<p class="h">${instList(r.inst)} · ${REP[r.rep]} · ${r.model} · ${when(r)}</p>${runSoon()}`); };
+
+render();
+
+</script>
+</body>
+</html>
