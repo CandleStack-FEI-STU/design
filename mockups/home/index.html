@@ -576,6 +576,32 @@
   .gh-meta { display: flex; justify-content: space-between; gap: 8px; }
   .soon-tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; background: var(--bg); border: 1px solid var(--rule); border-radius: 999px; padding: 8px 16px; font: 500 12.5px var(--mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink); box-shadow: 0 8px 24px var(--shadow); }
   .soon-tag .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  /* Sign in: one card in the middle of the grid, GitHub and Google only */
+  .si { min-height: calc(100vh - 56px - 160px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-block: 48px; }
+  .si-card { width: min(400px, 100%); padding: 32px 28px 26px; border: 1px solid var(--rule); border-radius: 12px; background: var(--bg); box-shadow: 0 10px 30px var(--shadow); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; animation: si-in 0.22s ease-out; }
+  @keyframes si-in { from { opacity: 0; transform: translateY(8px); } }
+  .si-mark { width: 44px; height: 44px; }
+  .si-card h1 { font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .si-lead { margin-top: 6px; color: var(--muted); font-size: 14px; }
+  .si-btns { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  #si-denied .si-btns { flex-direction: row; justify-content: center; }
+  .si-b { appearance: none; position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; width: 100%; border-radius: 8px; font: 500 15px var(--sans); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s, opacity 0.15s; }
+  .si-b svg { width: 18px; height: 18px; flex: none; }
+  .si-b.gh { border: 1px solid var(--ink); background: var(--ink); color: var(--bg); }
+  .si-b.gg { border: 1px solid var(--rule); background: var(--bg); color: var(--ink); }
+  .si-b:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px var(--shadow); }
+  .si-b.gg:hover:not(:disabled) { background: var(--surface); }
+  .si-b:disabled { cursor: default; opacity: 0.55; }
+  .si-b.busy { opacity: 1; }
+  .si-b.busy svg { visibility: hidden; }
+  .si-b.busy::before { content: ""; position: absolute; left: calc(50% - 82px); width: 16px; height: 16px; border-radius: 999px; border: 2px solid currentColor; border-right-color: transparent; animation: si-spin 0.7s linear infinite; }
+  @keyframes si-spin { to { transform: rotate(360deg); } }
+  .si-note { margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .si-dot { flex: none; width: 7px; height: 7px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .si-legal { font-size: 12px; color: var(--muted); text-align: center; max-width: 400px; }
+  body.on-signin .ahdr .r a.btn { display: none; }
+  @media (prefers-reduced-motion: reduce) { .si-card, .si-b.busy::before { animation: none; } .si-b { transition: none; } }
   /* Phone view: this page in a 390 x 844 frame, for review */
   .pv-btn { position: fixed; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); font: 500 13.5px var(--sans); cursor: pointer; box-shadow: 0 6px 20px var(--shadow); }
   .pv-btn:hover { border-color: var(--accent); }
@@ -594,15 +620,15 @@
   <nav class="anav" aria-label="Main"><a class="on" href="#top" id="nav-home">Product</a><a href="#/instruments" id="nav-inst">Instruments</a><a href="https://app.candlestack.tech/api/v1/docs" target="_blank" rel="noopener">API</a></nav>
   <div class="sp"></div>
   <div class="r">
-    <button type="button" class="btn ghost hide-sm" data-toast="Sign-in comes with Try Backtest.">Sign in</button>
-    <button type="button" class="btn pri" data-toast="Try Backtest opens the builder. It is the next screen we design.">Try Backtest</button>
+    <a class="btn ghost hide-sm" href="#/signin">Sign in</a>
+    <a class="btn pri" href="#/signin">Try Backtest</a>
     <button type="button" class="btn ghost icon" id="theme" aria-label="Switch theme"></button>
   </div>
 </div></header>
 
 <main class="abody" id="top">
 <div id="home">
-<section class="hero stack"><div class="hero-t"><h1 style="margin-top:0">Backtest your models and compare every experiment</h1><p class="lead">Run a trained model on real stock and crypto candles, try different configurations and see which one holds up. Change how prices are represented, which model predicts or how its predictions become trades. Every run is measured the same way.</p><div class="cta"><button type="button" class="btn pri lg" data-toast="Try Backtest opens the builder. It is the next screen we design.">Try Backtest</button><a class="btn lg" href="#/instruments">Browse instruments</a></div></div>
+<section class="hero stack"><div class="hero-t"><h1 style="margin-top:0">Backtest your models and compare every experiment</h1><p class="lead">Run a trained model on real stock and crypto candles, try different configurations and see which one holds up. Change how prices are represented, which model predicts or how its predictions become trades. Every run is measured the same way.</p><div class="cta"><a class="btn pri lg" href="#/signin">Try Backtest</a><a class="btn lg" href="#/instruments">Browse instruments</a></div></div>
       <div class="card plh"><div class="plh-row"><div class="plh-col"><span class="eyebrow">Input</span><div class="plh-node ">Market data</div><ul><li>15,000+ stocks and pairs</li><li>1m to 1d candles</li><li>since 2016</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 1</span><div class="plh-node layer">Representation</div><ul><li>Renko · Kagi · P&amp;F</li><li>Heikin-Ashi · Line break</li><li>Range and volume bars</li><li>Time windows</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 2</span><div class="plh-node layer">Model</div><ul><li>Your trained model</li><li>Keras, PyTorch, ONNX</li><li>Input shape check</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Layer 3</span><div class="plh-node layer">Decision</div><ul><li>Threshold</li><li>Stop loss</li><li>Smoothing</li></ul></div><div class="plh-wire"><span class="dot"></span></div><div class="plh-col"><span class="eyebrow">Output</span><div class="plh-node ">Results</div><ul><li>Return, Sharpe</li><li>Drawdown</li><li>Trades on the chart</li></ul></div></div></div></section>
 <section id="layers" class="hsec"><span class="eyebrow">How a run works</span><h2>Three layers you can swap</h2><p class="sub">Every backtest takes the same path from candles to trades. The three layers in the middle are what you change and compare.</p>
     <div class="body layers">
@@ -617,6 +643,29 @@
   <section id="experiments" class="hsec two"><div><span class="eyebrow">Public experiments</span><h2>A catalog of published experiments</h2><p class="sub">Runs their authors chose to publish, each with its instrument, representation, model and decision settings and the same metrics, so anyone can look one up and run it again.</p></div>
     <div class="soon-card"><div class="soon-ghost gh-cards" aria-hidden="true"><div class="gh-card"><i class="gb" style="width:78%"></i><i class="gb gh-s" style="width:55%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 22 L14 18 L28 20 L42 12 L56 14 L70 8 L84 10 L100 4"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div><div class="gh-card"><i class="gb" style="width:64%"></i><i class="gb gh-s" style="width:70%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 18 L14 20 L28 14 L42 16 L56 10 L70 12 L84 6 L100 8"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div><div class="gh-card"><i class="gb" style="width:72%"></i><i class="gb gh-s" style="width:48%"></i><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 20 L14 14 L28 16 L42 8 L56 12 L70 6 L84 9 L100 3"/></svg><div class="gh-meta"><i class="gb up" style="width:34%"></i><i class="gb gh-s" style="width:26%"></i></div></div></div><span class="soon-tag"><span class="dot"></span>Coming soon</span></div></section>
 </div>
+<section id="signin" class="si" aria-label="Sign in" hidden>
+<div class="si-card">
+  <svg class="si-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lg-a" width="32" height="32" rx="7"></rect><g class="lg-b"><rect x="10" y="12" width="2" height="14"></rect><rect x="8" y="16" width="6" height="8"></rect><rect x="20" y="6" width="2" height="18"></rect><rect x="18" y="10" width="6" height="10"></rect></g></svg>
+  <div id="si-start">
+    <h1 id="si-title">Sign in to CandleStack</h1>
+    <p class="si-lead" id="si-lead">New here? The same buttons create your account.</p>
+    <div class="si-btns">
+      <button type="button" class="si-b gh" data-si="github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>Continue with GitHub</span></button>
+      <button type="button" class="si-b gg" data-si="google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
+    </div>
+    <p class="si-note"><span class="si-dot"></span>In beta, open to people on the beta list</p>
+  </div>
+  <div id="si-denied" hidden>
+    <h1>You are not on the beta list yet</h1>
+    <p class="si-lead"><b>arsen@example.com</b> cannot sign in during the beta. Ask the team for an invite, then try again.</p>
+    <div class="si-btns">
+      <button type="button" class="btn" data-si="back">Use another account</button>
+      <a class="btn ghost" href="https://candlestack.tech" target="_blank" rel="noopener">Contact the team</a>
+    </div>
+  </div>
+</div>
+<p class="si-legal">We only get your name and email. No password is stored.</p>
+</section>
 <section id="detail" class="ilist" aria-label="Instrument" hidden></section>
 <section id="inst" class="ilist" aria-label="Instruments" hidden>
 <div class="ptitle"><h1>Instruments</h1><p>Everything you can run a backtest on: US stocks and ETFs from every exchange, and Binance spot pairs. Open one to see its candles.</p><ul class="ifacts"><li><b>15,000+</b> instruments</li><li><b>1m – 1d</b> candles</li><li><b>Jan 2016</b> first stock candles</li><li><b>Since listing</b> for crypto pairs</li></ul></div>
@@ -664,17 +713,19 @@ let lastView = '';
 let detailBack = { href: '#/instruments', label: 'Instruments' };
 function route(e) {
   const h = location.hash;
-  const view = h.startsWith('#/instrument/') ? 'detail' : h.startsWith('#/instruments') ? 'inst' : 'home';
-  for (const v of ['home', 'inst', 'detail']) document.getElementById(v).hidden = v !== view;
+  const view = h.startsWith('#/signin') ? 'signin' : h.startsWith('#/instrument/') ? 'detail' : h.startsWith('#/instruments') ? 'inst' : 'home';
+  for (const v of ['home', 'inst', 'detail', 'signin']) document.getElementById(v).hidden = v !== view;
   document.getElementById('nav-home').classList.toggle('on', view === 'home');
-  document.getElementById('nav-inst').classList.toggle('on', view !== 'home');
+  document.body.classList.toggle('on-signin', view === 'signin');
+  document.getElementById('nav-inst').classList.toggle('on', view === 'inst' || view === 'detail');
+  if (view === 'signin') window.siReset();
   if (view === 'detail' && e && e.type === 'hashchange') {
     const from = new URL(e.oldURL).hash;
     if (from.startsWith('#/instruments')) detailBack = { href: from, label: 'Instruments' };
     else if (!from.startsWith('#/instrument/')) detailBack = { href: '#markets', label: 'Home' };
   }
   if (view === 'detail' && window.renderDetail) window.renderDetail(decodeURIComponent(h.slice('#/instrument/'.length)), detailBack);
-  if (view !== 'detail') document.title = view === 'inst' ? 'Instruments · CandleStack' : 'CandleStack Home';
+  if (view !== 'detail') document.title = view === 'inst' ? 'Instruments · CandleStack' : view === 'signin' ? 'Sign in · CandleStack' : 'CandleStack Home';
   if (view !== lastView && lastView) {
     const t = view === 'home' ? document.getElementById(h.slice(1)) : null;
     if (t) t.scrollIntoView(); else window.scrollTo(0, 0);
@@ -699,6 +750,27 @@ document.addEventListener('click', e => {
   box.addEventListener('click', (e) => { if (e.target === box) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !box.hidden) close(); });
   addEventListener('resize', () => { if (!box.hidden) fit(); });
+})();
+
+// Sign in: GitHub goes on (here, to the signed-in app's mockup); Google shows the page for an account not on the beta list.
+(() => {
+  const start = document.getElementById('si-start'), denied = document.getElementById('si-denied');
+  // One page for both: the first sign-in creates the account
+  window.siReset = () => {
+    start.hidden = false; denied.hidden = true;
+    document.querySelectorAll('.si-b').forEach(b => { b.disabled = false; b.classList.remove('busy'); });
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-si]'); if (!b) return;
+    if (b.dataset.si === 'back') { siReset(); return; }
+    document.querySelectorAll('.si-b').forEach(x => { x.disabled = true; });
+    b.classList.add('busy'); b.querySelector('span').textContent = b.dataset.si === 'github' ? 'Opening GitHub' : 'Opening Google';
+    setTimeout(() => {
+      b.querySelector('span').textContent = b.dataset.si === 'github' ? 'Continue with GitHub' : 'Continue with Google';
+      if (b.dataset.si === 'github') { siReset(); window.open('https://claude.ai/artifact/G9AVfYw77bQbtXnVxT7fJH', '_blank', 'noopener'); }
+      else { start.hidden = true; denied.hidden = false; }
+    }, 1100);
+  });
 })();
 window.addEventListener('hashchange', route);
 window.addEventListener('popstate', route);
