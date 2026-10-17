@@ -96,7 +96,6 @@
 
   /* Controls */
   .f { display: flex; flex-direction: column; gap: 8px; }
-  .lab { font-size: 13px; font-weight: 500; }
   .lab-row { display: flex; justify-content: space-between; align-items: baseline; }
   .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
   .seg button { appearance: none; border: 1px solid var(--rule); background: var(--bg); height: 30px; min-width: 40px; padding: 0 10px; border-radius: 6px; font: 500 13px var(--mono); color: var(--muted); cursor: pointer; }
@@ -253,7 +252,6 @@
   /* Shared bits */
   .badge.bad { color: var(--down); border-color: color-mix(in srgb, var(--down) 45%, var(--rule)); }
   .badge.run { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
-  .badge.soon { border-style: dashed; }
   .prog { display: block; height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; min-width: 60px; }
   .prog i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
   .back { appearance: none; border: 0; background: none; padding: 0; margin-bottom: 14px; color: var(--muted); font: 13px var(--sans); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
@@ -298,29 +296,10 @@
   .standin p { color: var(--muted); max-width: 62ch; margin-top: 4px; }
 
   /* Settings */
-  .set { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; }
-  .set-nav { display: flex; flex-direction: column; gap: 2px; }
-  .set-nav button { appearance: none; text-align: left; padding: 7px 10px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 14px var(--sans); cursor: pointer; white-space: nowrap; }
-  .set-nav button:hover { color: var(--ink); }
-  .set-nav button.on { background: var(--surface2); color: var(--ink); font-weight: 500; }
-  .set-p { padding: 24px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-  .set-p h2 { font-size: 18px; letter-spacing: -0.01em; }
-  .set-p .lead { color: var(--muted); margin-top: 2px; }
-  .fg { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 14px 20px; align-items: center; }
-  .fg > .lab { color: var(--muted); font-weight: 400; font-size: 14px; }
-  .fg .inp { max-width: 340px; }
-  .fg .two { display: flex; gap: 8px; align-items: center; max-width: 340px; }
-  .set-f { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--rule); }
   .meter { display: block; height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; max-width: 340px; }
   .meter i { display: block; height: 100%; background: var(--accent); }
-  .soon { border: 1px dashed var(--rule); border-radius: 8px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
-  .soon p { color: var(--muted); font-size: 13px; margin-top: 2px; max-width: 56ch; }
-  .danger-z { border: 1px solid color-mix(in srgb, var(--down) 35%, var(--rule)); border-radius: 8px; padding: 14px 16px; display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-  .danger-z p { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
   @media (max-width: 980px) {
-    .set { grid-template-columns: minmax(0, 1fr); }
-    .set-nav { flex-direction: row; overflow-x: auto; padding-bottom: 2px; }
   }
   @media (max-width: 639px) {
     .afoot .cred { margin-left: 0; }
@@ -331,9 +310,6 @@
     .nb-t { display: none; }
     .nb-i { display: block; }
     .btn.nb { width: 34px; padding: 0; }
-    .fg { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-    .fg > .lab { margin-top: 8px; }
-    .set-p { padding: 18px; }
     .mrow { grid-template-columns: minmax(0, 1fr); }
     .mrow .ru { text-align: left; }
   }
@@ -751,7 +727,7 @@ const FORMATS = ['Keras', 'TensorFlow', 'PyTorch', 'ONNX', 'scikit-learn'];
 // ---------- state ----------
 const S = {
   v: 'D', pop: null, empty: false, page: 'dash', from: 'dash', run: null, newSrc: null, menu: false, set: 'profile', delc: false,
-  setv: { tf: '30m', dir: 'long', sl: 7, the: 0.05, bench: 'bh', tz: 'ny', df: 'dmy', tf2: '24', calm: false, start: 'dash', theme: 'system' },
+  setv: { tf: '30m', dir: 'long', sl: 7, the: 0.05, bench: 'bh', tz: 'ny', df: 'dmy', tf2: '24', calm: false },
 };
 const DIRS = {}, DFN = {}, ACT = {}, LIVE = {}, INPUT = {};
 
@@ -929,24 +905,9 @@ function pageNew() {
 }
 function pageRuns() { const n = runs().length; return `<div class="ttl"><div><h1>Backtests</h1><p>${n} ${n === 1 ? 'backtest' : 'backtests'} · newest first</p></div></div><div class="card">${runsTable()}</div>`; }
 function pageModels() { return `<div class="ttl"><div><h1>Models</h1><p>Built-in models and the ones you uploaded</p></div></div>${modelsList()}`; }
-const SET_TABS = [['profile', 'Profile'], ['defaults', 'Backtest defaults'], ['look', 'Appearance'], ['data', 'Data and storage'], ['apps', 'Connected apps'], ['acct', 'Account']];
-function settingsPanel() {
-  const fld = (l, c) => `<span class="lab">${l}</span><div>${c}</div>`;
-  const inp = (v, lab) => `<input class="inp" value="${v}" aria-label="${lab}">`;
-  const p = {
-    profile: () => `<div><h2>Profile</h2><p class="lead">How you show up in CandleStack.</p></div><div class="fg">${fld('Name', inp(USER.name, 'Name'))}${fld('Email', inp(USER.email, 'Email'))}${fld('Password', '<button type="button" class="btn sm">Change password</button>')}</div><div class="set-f"><button type="button" class="btn pri">Save changes</button></div>`,
-    defaults: () => `<div><h2>Backtest defaults</h2><p class="lead">New backtests start with these. Each backtest can change them.</p></div><div class="fg">${fld('Timeframe', seg(['5m', '30m', '1h', '1d'], S.setv.tf, 'setv', 'tf'))}${fld('Test period', `<div class="two">${inp('2021-01-04', 'From')}<span class="muted">to</span>${inp('2024-12-31', 'To')}</div>`)}${fld('Direction', seg([['long', 'Long only'], ['both', 'Long and short']], S.setv.dir, 'setv', 'dir'))}${fld('Threshold', inp('0.05', 'Threshold'))}${fld('Stop loss', seg(['5 %', '7 %', '10 %'], S.setv.sl, 'setv', 'sl'))}${fld('Fees', inp('0.1 % per side', 'Fees'))}${fld('Slippage', inp('0.02 %', 'Slippage'))}${fld('Benchmark', '<span class="mono">Buy &amp; hold</span>')}</div><div class="set-f"><button type="button" class="btn pri">Save defaults</button></div>`,
-    look: () => `<div><h2>Appearance</h2><p class="lead">Saved to your account, so every device looks the same.</p></div><div class="fg">${fld('Theme', seg([['system', 'System'], ['light', 'Light'], ['dark', 'Dark']], S.setv.theme, 'theme3'))}${fld('After sign-in', seg([['dash', 'Dashboard'], ['new', 'New backtest']], S.setv.start, 'setv', 'start'))}</div>`,
-    data: () => `<div><h2>Data and storage</h2><p class="lead">Where the candles come from and what your account keeps.</p></div><div class="fg">${fld('Market data', '<span>Alpaca, SIP feed</span><span class="hint" style="display:block">Delayed 15 min</span>')}${fld('Stored backtests', `<span class="mono">${runs().length}</span><span class="hint" style="display:block">Kept until you delete them</span>`)}${fld('Uploaded models', `<span class="mono">${S.empty ? '0 MB' : `${USAGE.modelsMB} MB`} of ${USAGE.capMB} MB</span><span class="meter" style="margin-top:6px"><i style="width:${S.empty ? 0 : USAGE.modelsMB / USAGE.capMB * 100}%"></i></span>`)}${fld('Export', '<button type="button" class="btn sm">Download backtests as CSV</button>')}</div>`,
-    apps: () => `<div><h2>Connected apps</h2><p class="lead">Use CandleStack from other tools.</p></div><div class="soon"><div><b>Claude and ChatGPT</b><p>Ask about your backtests and start new ones from a chat. You sign in with your CandleStack account.</p></div><span class="badge soon">Coming soon</span></div>`,
-    acct: () => `<div><h2>Account</h2><p class="lead">Signed in as ${USER.email}</p></div><div class="fg">${fld('Sessions', '<button type="button" class="btn sm">Sign out everywhere</button>')}</div><div class="danger-z"><div><b>Delete account</b><p>Deletes your backtests and uploaded models. This cannot be undone.</p></div>${S.delc ? `<div class="chips"><button type="button" class="btn sm" data-act="delc">Cancel</button><button type="button" class="btn sm danger pri">Delete ${runs().length} backtests and the account</button></div>` : '<button type="button" class="btn sm danger" data-act="delc">Delete account</button>'}</div>`,
-  };
-  return `<div class="set"><nav class="set-nav" aria-label="Settings">${SET_TABS.map(([k, l]) => `<button type="button" class="${S.set === k ? 'on' : ''}" data-act="setTab" data-val="${k}">${l}</button>`).join('')}</nav><section class="card set-p">${p[S.set]()}</section></div>`;
-}
-function pageSettings() { return `<div class="ttl"><div><h1>Settings</h1><p>Your account and how new backtests start</p></div></div>${settingsPanel()}`; }
 // Overlays: a function per modal, S.modal names the open one
 const MODALS = {};
-const PAGES = { run: pageRun, new: pageNew, runs: pageRuns, models: pageModels, settings: pageSettings };
+const PAGES = { run: pageRun, new: pageNew, runs: pageRuns, models: pageModels };
 
 // ---------- page ----------
 function render() {
@@ -968,8 +929,8 @@ const CORE = {
   newFrom: (b, v) => { S.newSrc = { k: 'run', id: +v }; go('new'); },
   tpl: (b, v) => { S.newSrc = { k: 'tpl', i: +v }; go('new'); },
   menu: () => { S.menu = !S.menu; },
-  theme: () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; S.setv.theme = document.documentElement.dataset.theme; },
-  theme3: (b, v) => { S.setv.theme = v; if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; },
+  theme: () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; },
+  theme3: (b, v) => { document.documentElement.dataset.theme = v; },
   setTab: (b, v) => { S.set = v; if (S.page !== 'settings') go('settings'); },
   setv: (b, v) => { S.setv[b.dataset.k] = v; },
   star: (b, v) => { const r = runs().find(x => x.id === +v); if (r) r.star = !r.star; },
